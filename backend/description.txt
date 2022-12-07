@@ -1,0 +1,33 @@
+
+
+///////////////
+
+      ** Find true range
+
+True Range for a day = Day High - Day Low
+Calculate True Range for last 14 days
+If your calculating from 18th Nov then u need to start from  17th Nov and go back 14 days
+Each day calculate True Range for the day
+So u wil have 14 True Range values
+Now take an average of this
+This is Average True Range
+
+
+//////
+
+      ** find FA-high FA-Low
+if IBL timer or IBH timer is greater than zero and less than 30 mins .. mark the Day low or day high as FA and add reference
+IBL na FA-LOW .. price wil be day low
+IBH na FA-HIGH and price will be day high
+
+
+
+
+
+/// activated route
+
+helps to get its params , queryParams , fragments ....
+
+//  router
+
+router helps to navigate the page

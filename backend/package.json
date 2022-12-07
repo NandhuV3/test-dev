@@ -1,0 +1,38 @@
+{
+  "name": "candlestick",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+
+    "http": "^0.0.1-security",
+    "jszip": "^3.10.0",
+    "adm-zip": "^0.5.9",
+    "twilio": "^3.83.1",
+    "https": "^1.0.0",
+    "express": "^4.17.2",
+    "path": "^0.12.7",
+    "body-parser": "^1.19.1",
+    "fs": "^0.0.1-security",
+    "moment": "^2.29.1",
+    "node-cron": "^3.0.0",
+    "mongodb": "^4.5.0",
+    "aws-sdk": "^2.1138.0",
+    "dotenv": "^16.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "kiteconnect": "^4.0.0",
+    "socket.io": "^4.5.1",
+    "stompjs": "^2.3.3",
+    "bcryptjs": "^2.4.3",
+    "axios": "^0.26.1",
+    "papaparse": "^5.3.2",
+    "querystring": "^0.2.1",
+    "sha256": "^0.2.0",
+    "crypto-js": "^4.1.1",
+    "request": "^2.88.2",
+    "websocket": "^1.0.34",
+    "uuid": "^8.3.2",
+    "ws": "^8.6.0",
+    "net": "^1.0.2",
+    "d3": "3"
+  }
+}

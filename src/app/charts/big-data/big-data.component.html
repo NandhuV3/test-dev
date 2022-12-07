@@ -1,0 +1,51 @@
+<div *ngIf="chartErr" style="margin: 12% 25% 0 30%;">
+  <div class="card text-center text-white bg-danger">
+    <div class="card-body">
+      <h5 class="card-title">Error !</h5>
+      <p class="card-text alert alert-danger">{{chartErrMsg}}</p>
+    </div>
+  </div>
+</div>
+<div class="bigData" *ngIf="showContent">
+  <div class="container">
+    <div *ngIf="errorOccured" class="alert alert-danger">{{errMsg}}</div>
+    <form [formGroup]="checkoutForm" (ngSubmit)="onSubmitOne()">
+      <div class="card mb-5">
+        <div class="card-body">
+          <p class="card-text lead">
+            Hello User <br>Please first select the <b class="text-white">FROM</b> and <b class="text-white">TO</b> date <br> and <br> enter the <b class="text-white">VALUE</b> for both the fields <br> and <br> sumbit to see the difference in chart.
+          </p>
+          <p class="text-warning">** FROM date must greater than TO date</p>
+        </div>
+      </div>
+      <div class="card mb-5">
+        <div class="card-header">
+          From : <input type="date" class="w-25" formControlName="from1" placeholder="Enter From Date"
+            required>
+          To : <input type="date" class="w-25" formControlName="to1" placeholder="Enter To Date" required>
+          value : <input type="number" class="w-25" formControlName="value1" placeholder="enter the value" required>
+        </div>
+        <div class="card-body">
+          <!-- first chart -->
+          <h4 *ngIf="!clearNoContent" class="text-center text-muted">No Content to show</h4>
+          <div id="Range-high1"></div>
+        </div>
+      </div>
+
+      <div class="card mt-5">
+        <div class="card-header">
+          From : <input type="date" class="w-25" placeholder="Enter From Date" formControlName="from2" required>
+          To : <input type="date" class="w-25" placeholder="Enter To Date" formControlName="to2" required>
+          value : <input type="number" class="w-25" placeholder="enter the value" formControlName="value2" required>
+        </div>
+        <div class="card-body">
+          <!-- second chart -->
+          <h4 *ngIf="!clearNoContent" class="text-center text-muted">No Content to show</h4>
+          <div id="Range-high2"></div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary mt-5 mb-5 col-12" [disabled]="!checkoutForm.valid">Submit</button>
+    </form>
+
+  </div>
+</div>

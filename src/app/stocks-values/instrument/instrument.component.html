@@ -1,0 +1,43 @@
+<div *ngIf="pageErr" style="margin: 12% 25% 0 30%;">
+  <div class="card text-center text-white bg-danger">
+    <div class="card-body">
+      <h5 class="card-title">Error !</h5>
+      <p class="card-text alert alert-danger">{{pageErrMsg}}</p>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-center" *ngIf="isLoading" style="margin-top: 35vh;margin-bottom: 5vh;">
+  <div class="spinner-border" role="status" style="color: white;"></div>
+</div>
+<div class="container-fluid content" *ngIf="showComponent">
+  <!-- #f7f7f7 -->
+  <div class="row">
+    <!-- <div class="col-md-2"></div> -->
+    <div class="col-md-12 col-sm-12 col-lg-12 col-xs-12">
+      <h1 class="mb-5 mt-3">Instrument lists</h1>
+      <p id="existsErr" class="alert alert-danger text-dark">Already this symbol is in the table</p>
+      <div class="d-flex justify-content-end">
+        <i style="position: absolute" class="bi bi-search mt-2 mr-2"></i>
+      </div>
+      <input type="text" id="inputchange" (ngModelChange)="modelChange($event)" [ngModel]="newstr"
+        placeholder="search  with  tradingsymbol.." class="form-control mb-5">
+      <ul *ngIf="showli" class="list-group" style="background-color: #161d36;color: #ced0d6;">
+        <li style="background-color: #161d36;color: #ced0d6;" class="list-group-item" (click)="findSymbol(item)"
+          *ngFor="let item of liElements">{{item}}</li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 room">
+      <table id="myTable" class="table table-borderless table-striped text-white text-center">
+        <thead>
+          <tr class="card-header text-center" style="background-color: #101a69;">
+            <th>Trading_Symbol</th>
+            <th>Last_Price</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
