@@ -1,0 +1,63 @@
+<div *ngIf="chartErr" style="margin: 12% 25% 0 30%;">
+  <div class="card text-center text-white bg-danger">
+    <div class="card-body">
+      <h5 class="card-title">Error !</h5>
+      <p class="card-text alert alert-danger">{{chartErrMsg}}</p>
+    </div>
+  </div>
+</div>
+<div class="overall" *ngIf="showChart">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-1"></div>
+      <div class="col-lg-5">
+        <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+          <div class="card">
+            <div class="card-body">
+              <p *ngIf="displayErr" class="alert alert-danger">{{displayErrmsg}}</p>
+              <p class="card-text">
+                Please enter the value to find the HIGH and LOW for the given days
+              </p>
+              <input class="w-100 mb-3 text-center ml-0" type="number" id="value" name="value"
+                formControlName="value" required>
+              <button class="btn btn-primary w-100">Change</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6"></div>
+    </div>
+  </div>
+  <div style="margin: 25px 0;"></div>
+  <div class="cotainer">
+    <div class="row">
+      <div class="col-lg-1"></div>
+      <div class="col-lg-10">
+        <div class="card">
+          <div class="card-body">
+            <p class="card-title display-4">
+              calculate with day High
+            </p>
+            <div id="line-chart-high"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-1"></div>
+    </div>
+    <div style="margin: 25px 0;"></div>
+    <div class="row">
+      <div class="col-lg-1"></div>
+      <div class="col-lg-10">
+        <div class="card">
+          <div class="card-body">
+            <p class="card-title display-4">
+              calculate with day Low
+            </p>
+            <div id="line-chart-low"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-1"></div>
+    </div>
+  </div>
+</div>

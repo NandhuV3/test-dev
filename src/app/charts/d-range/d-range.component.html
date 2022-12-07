@@ -1,0 +1,161 @@
+<div *ngIf="isLoading" class="spinner f-loading">
+  <div class="spinner-border f-load" role="status"></div>
+  <div class="loading">
+    <p class="h3 text-white">Please wait</p>
+    <div class="spinner-grow spinner-grow-sm" role="status">
+    </div>
+    <div class="spinner-grow spinner-grow-sm" role="status">
+    </div>
+    <div class="spinner-grow spinner-grow-sm" role="status">
+    </div>
+  </div>
+</div>
+<div class="container" *ngIf="!isLoading">
+  <div class="row mt-5 mb-5">
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-header">
+          <h5>Open Type</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <p>{{displaytext}}</p>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card valueType" style="display: none;">
+        <div class="card-header">
+          <h5>Value Type</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <p id="openvalue"></p>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-header">
+          <h5>Rate of change of Vwap</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0 text-center">
+            <div class="spinner">
+              <div id="rate-spinner" class="spinner-border" role="status"></div>
+            </div>
+            <p id="rate-value" style="display: none;"></p>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-5 mb-5">
+
+    <div class="col-sm-4">
+      <div id="first15min" class="card" style="display: none;">
+        <div class="card-header">
+          <h5>chart with 15min volume</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <div id="first15minChart"></div>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div id="d-totalVolume" class="card" style="display: none;">
+        <div class="card-header">
+          <h5>chart with day volume</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <div id="totalVolume_Chart"></div>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div id="d-ValueArea" class="card" style="display: none;">
+        <div class="card-header">
+          <h5>chart with Day-ValueArea</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <div id="ValueArea_Chart"></div>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-5 mb-5">
+    <div class="col-sm-4">
+      <div class="card priceStatus" style="display: none;">
+        <div class="card-header">
+          <h5>Moving Status</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <p id="blink"></p>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card priceEntered" style="display: none;">
+        <div class="card-header">
+          <h5>Price entered</h5>
+        </div>
+        <div class="card-body text-center">
+          <blockquote class="blockquote mb-0">
+            <p id="aboveBelow"></p>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card dayPosibilities" style="display: none;">
+        <div class="card-header">
+          <h5>Today's Possibilities</h5>
+        </div>
+        <div class="card-body text-center">
+          <div>
+            <blockquote class="blockquote mb-0">
+              <blockquote id="estimateRange1" class="blockquote mb-0"></blockquote>
+              <blockquote id="estimateRange2" class="blockquote mb-0"></blockquote>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-5 mt-5">
+    <div class="col-sm-6">
+      <div id="ROC_vwap5" class="card" style="display: none;">
+        <div class="card-header">
+          <h5> ROC_vwap chart with <a href="#" class="text-danger heading">5mins Interval</a></h5>
+        </div>
+        <div class="card-body">
+          <blockquote class="blockquote mb-0">
+            <div id="ROC_vwapChart5"></div>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 ">
+      <div id="ROC_vwap30" class="card" style="display: none;">
+        <div class="card-header">
+          <h5> ROC_vwap chart with <a href="#" class="text-primary heading">30mins Interval</a></h5>
+        </div>
+        <div class="card-body">
+          <blockquote class="blockquote mb-0">
+            <div id="ROC_vwapChart30"></div>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

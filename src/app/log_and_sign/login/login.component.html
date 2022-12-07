@@ -1,0 +1,67 @@
+<!-- //================== -->
+<nav class="navbar navbar-expand-lg navbar-light text-white fixed-top shadow-sm mb-5 bg-body " id="mainNav">
+
+  <div class="nav-headers">
+    <!-- <img class="img-thumbnail logo"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/2048px-Angular_full_color_logo.svg.png"
+      alt="logo"><a class="navbar-brand">DoubleMint</a> -->
+    <img class="logo" src="../assets/img/WhatsApp Image 2022-06-11 at 12.58.58 PM.jpeg" alt="logo">
+  </div>
+</nav>
+
+
+<div class="register-photo" *ngIf="isLoggedin === false && showDOM">
+  <div class="container">
+    <p *ngIf="alertMsg" class="alert alert-success">successfully logged-In</p>
+    <p *ngIf="checkEmail" class="alert alert-danger">Email-Id Not Exists</p>
+    <p *ngIf="checkPassword" class="alert alert-danger">Password Not Matched With Email-id</p>
+  </div>
+  <div class="form-container">
+    <!-- alert Message -->
+    <div class="image-holder"></div>
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+      <h2 class="text-center mt-3 mb-4"><strong>Welcome</strong> Back!</h2>
+      <div class="form-group">
+        <input class="form-control" [(ngModel)]="user_Email" id="email" type="email" name="email"
+          formControlName="email" placeholder="Email">
+        <div *ngIf="contactForm.get('email').invalid && contactForm.get('email').touched">
+          <p *ngIf="contactForm.get('email').errors?.required" class="text-danger" role="alert">* Email-Id Required</p>
+          <p *ngIf="contactForm.get('email').errors?.minlength" class="text-danger" role="alert">* Please enter valid
+            email-id</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="d-flex justify-content-end">
+          <input class="form-control" id="secret_pwd" type="password" name="password" placeholder="password"
+            formControlName="password" required />
+          <i style="position: absolute" *ngIf="!showEyeIcon" class="bi bi-eye-slash-fill mt-2"
+            (click)="show_pwd()"></i>
+          <i style="position: absolute" *ngIf="showEyeIcon" class="bi bi-eye-fill mt-2" (click)="show_pwd()"></i>
+        </div>
+        <div *ngIf="contactForm.get('password').invalid && contactForm.get('password').touched">
+          <p *ngIf="contactForm.get('password').touched && contactForm.get('password').errors?.required"
+            class="text-danger" role="alert">
+            * Password Required
+          </p>
+        </div>
+      </div>
+      <div class="d-flex justify-content-around align-items-center mb-4">
+        <!-- Checkbox -->
+        <div class="form-check">
+          <input class="form-check-input" checked id="remember_me" type="checkbox" />
+          <label class="form-check-label" for="form1Example3"> Remember me </label>
+        </div>
+        <a style="cursor: pointer;color:blue" (click)="forgotPass()"><u>Forgot password?</u></a>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-info btn-rounded btn-sm btn-block" type="submit"
+          [disabled]="!contactForm.valid">Login</button>
+        <p class="text-center text-muted mt-3 mb-0 signup">create new account ? <a
+            class="fw-bold text-body link-primary" routerLink="/signup"><u class="text-primary">signup here</u></a></p>
+        <div class=" mb-2 mt-2 text-center">- or -</div>
+        <a [href]="kiteLoginUrl" type="button" class="btn btn-danger btn-rounded btn-block btn-sm">Login with Zerodha
+          Kite</a>
+      </div>
+    </form>
+  </div>
+</div>

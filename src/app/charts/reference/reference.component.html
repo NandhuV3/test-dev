@@ -1,0 +1,65 @@
+<div style="margin-top: 20vh;"></div>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12 text-center">
+      <form #ref_Form="ngForm" (ngSubmit)="onSubmit(ref_Form.value)">
+        <div class="input-group">
+          <input type="text" [(ngModel)]="label" class="form-control text-dark" placeholder="label" name="label" ngModel
+            required>
+          <input type="number" [(ngModel)]="price" class="form-control text-dark" placeholder="price" name="price"
+            ngModel required>
+          <!-- <p class="form-control text-dark">select color :  <input type="color" style="width: 2vw;" [(ngModel)]="color" placeholder="color" name="color" ngModel required></p> -->
+          <input type="text" autocomplete="off" name="color" [(ngModel)]="color" placeholder="color" id="pickcolor"
+            class="call-picker form-control text-dark" ngModel required>
+          <p class="color-picker" id="color-picker" style="display: none">
+            <li [ngStyle]="{'background-color': '#'+val}"
+              style="cursor: pointer;width: 10px;height: 10px;list-style-type: none;float: left;margin: 2px;"
+              (click)="someFun(val)" *ngFor="let val of totalColors"></li>
+          </p>
+          <input type="date" [(ngModel)]="date" class="form-control text-dark" name="date" ngModel required>
+          <button *ngIf="!changeBTN" class="btn btn-primary ml-2 w-25" [disabled]="ref_Form.invalid"
+            type="submit">Add</button>
+          <button *ngIf="changeBTN" class="btn btn-warning ml-2 w-25" [disabled]="ref_Form.invalid"
+            type="submit">Modify</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-sm-12 mt-5">
+      <p class="alert alert-danger text-dark" *ngIf="showErr">{{showErrMsg}}</p>
+      <h2 class="text-center lead" *ngIf="emptyContent">{{emptyContentMsg}}</h2>
+      <table class="table text-center mt-3 " *ngIf="!emptyContent">
+        <tr>
+          <th class="text-warning" *ngFor="let head of tableHeaders">{{head}}</th>
+        </tr>
+        <tr *ngFor="let val of lablesList">
+          <td>{{val.label}}</td>
+          <td>{{val.price}}</td>
+          <td>{{val.color}}</td>
+          <td>{{val.date}}</td>
+          <td>
+            <label class="switch">
+              <input type="checkbox">
+              <span class={{val.AlertStatus}}
+                (click)="changeStatus([val.label,val.price,val.color,val.date,val.AlertStatus,val.SMS_status])"></span>
+            </label>
+          </td>
+          <td>
+            <label class="switch">
+              <input disabled type="checkbox">
+              <span class={{val.SMS_status}}
+              ></span>
+            </label>
+          </td>
+          <!-- (click)="changeStatus([val.label,val.price,val.color,val.date,val.SMS_status,val.SMS_status])" -->
+          <td>
+            <i class="bi bi-pencil-square ml-5" (click)="editLabel([val.label,val.price,val.color,val.date])"></i>
+            <i class="bi bi-trash ml-5" (click)="deleteLabel(val.label)"></i>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- <i class="fa-sharp fa-solid fa-file-pen"></i> <i class="fa-solid fa-trash"></i> -->

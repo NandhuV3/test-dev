@@ -1,2 +1,4 @@
-# test-dev
-this repository is used for testing purpose
+# Candlestick
+
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.3.
+

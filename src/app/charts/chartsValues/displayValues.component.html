@@ -1,0 +1,79 @@
+<div class="emp" style="margin-top: 100px;"></div>
+
+<!-- <div class="container-fluid"> -->
+
+<!-- First Grid -->
+<div class="row mt-5">
+  <div class="col-12">
+    <div class="labelBar">
+      <p id="LTP">LatestTradedPrice</p>
+      <div id="thermo"></div>
+    </div>
+  </div>
+</div>
+<div class="row inputEvents">
+  <div class="col-6 inputBox">
+    <p class="add">Add Labels and Values</p>
+    <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+      <input type="text" id="label" maxlength="4" name="labels" class="form-control mb-2" placeholder="enter the label"
+        formControlName="labels" required>
+      <input type="number" id="value" name="value" class="form-control mb-2" placeholder="enter the value"
+        formControlName="value" required>
+      <button class="btn btn-primary w-100">submit</button>
+    </form>
+  </div>
+  <div class="col-6">
+    <div>
+      <p class="delete">Click the label to delete</p>
+      <div class="anyClass">
+        <div>
+          <span (click)="onDelete(i)" class="badge bg-secondary" *ngFor="let value of inputData;let i=index">
+            {{value.labels}} {{value.value}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Second Grid -->
+
+<div class="row textChart">
+  <div class="col-lg-6 col-sm-6 col-xs-6">
+    <div class="barDiv">
+      <div id="barChart">
+        <p class="BarGraph">Bar Graph</p>
+        <h3 id="openVolume"></h3>
+        <h3 id="referenceValue"></h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6 col-sm-6 col-xs-6">
+    <div class="ibvalues">
+      <p id="newIB">InitialBalance</p>
+          <ul class="values">
+            <li style="color: blue;" id="IBHIGH"></li>
+            <li id="IB15UP"></li>
+            <li id="IB2UP"></li>
+            <li id="IB3UP"></li>
+          </ul>
+          <ul class="values">
+            <li style="color: blue;" id="IBLOW"></li>
+            <li id="IB15DOWN"></li>
+            <li id="IB2DOWN"></li>
+            <li id="IB3DOWN"></li>
+          </ul>
+      <div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- third Grid -->
+
+<div class="row mt-5">
+  <div class="col-12">
+    <div class="horizontalBar" id="horizontal-bar">TPO Volume Profile</div>
+  </div>
+</div>

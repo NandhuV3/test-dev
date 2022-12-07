@@ -1,0 +1,86 @@
+table {
+  color: #a3a0a0;
+}
+
+
+#datePicker {
+
+  background-color: transparent;
+  border: none;
+  background: none;
+  color: rgb(255, 0, 0);
+}
+
+#tableHeader {
+  font-size: 5vh;
+}
+
+#realised,
+#unrealised {
+  font-size: 1vw;
+  font-weight: 600;
+}
+
+table th {
+  font-size: 1vw;
+}
+
+table td {
+  color: #bfbdbe;
+  font-size: 1vw;
+}
+
+table td input {
+  width: 6vw;
+  font-size: 0.8vw;
+}
+
+#content {
+  margin: 10vh 0 5vh 15vw;
+}
+
+table td button {
+  font-size: 0.5vw;
+}
+
+::placeholder {
+  color: rgb(0, 0, 0);
+  text-align: center;
+}
+
+.request {
+  padding: 10px 50px;
+  margin-bottom: 20px;
+}
+
+.request p {
+  word-spacing: 10px;
+}
+
+.showPrevious {
+  font-size: 3vw;
+}
+
+.card {
+  background-color: #10133d;
+  color: #c2bebe;
+}
+
+.spinner-border {
+  color: white;
+}
+
+@media(max-width: 991px) {
+  .main-card {
+    overflow-x: scroll;
+    width: 100%;
+  }
+}
+
+.card-top-headers .card {
+  background-color: #231f66;
+}
+
+.card-top-headers .card-title {
+  font-size: 1.5vw;
+}
