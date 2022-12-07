@@ -1,0 +1,38 @@
+
+nav{
+  background-color: #0d1036;
+  color: white;
+}
+
+nav .nav-link {
+  font-size: 1vw;
+  color: rgb(255, 255, 255);
+  margin: 0 10px;
+}
+.logo{
+  width: 14vw;
+  border-radius: 5px;
+}
+nav ul :hover {
+  color: rgb(170, 158, 167);
+}
+
+.nav-headers {
+  font-size: 1.8vw;
+  margin-left: 10vw;
+}
+
+.bi-list{
+  color: white;
+}
+
+.dropdown{
+  margin-top: 10vh;
+}
+.sideBar{
+  position: fixed;
+}
+.dropdown-menu{
+  margin-top: 5vh;
+  left: 85vw;
+}

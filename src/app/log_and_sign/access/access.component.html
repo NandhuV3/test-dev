@@ -1,0 +1,11 @@
+<div class="card" style=" width: 30vw; margin: 15% 25% 0 35%;" *ngIf="KiteErr">
+  <div class="card-header text-center">
+    <h2>Doublemint</h2>
+  </div>
+  <div class="card-body text-center">
+    <blockquote class="blockquote text-center mb-0">
+      <p class="alert alert-danger">{{TokenErr}}</p>
+    </blockquote>
+    <button class="btn btn-primary block" routerLink="/login" (click)="goToLogin()">login</button>
+  </div>
+</div>

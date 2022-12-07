@@ -1,0 +1,48 @@
+.container{
+  margin-top: 20vh;
+}
+
+.f-loading {
+  margin-top: 20vh;
+}
+
+.f-load {
+  color: #fff;
+  margin-top: 100px;
+  margin-left: 50%;
+}
+
+.spinner p {
+  margin-top: 20px;
+  display: inline-block;
+  margin-left: 45%;
+}
+
+.spinner-grow {
+  margin: 0 3px;
+  height: 0.3rem;
+  width: 0.3rem;
+  color: blue;
+}
+
+.blink_me {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+.negativeRate{
+  color: red;
+}
+.positiveRate{
+  color: rgb(25, 167, 25);
+}
+
+//heading with a tag
+.heading{
+  text-decoration: none;
+  cursor: default;
+}

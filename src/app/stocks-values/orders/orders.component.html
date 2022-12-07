@@ -1,0 +1,143 @@
+<div *ngIf="timeOver" style="margin: 15% 25% 0 30%;">
+  <div class="card text-center text-white bg-danger">
+    <div class="card-body">
+      <h5 class="card-title">Hii User!</h5>
+      <p class="card-text">Your free time is over please Login.</p>
+      <button type="button" class="btn btn-primary" routerLink="/login">Login</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="OrdersErr" style="margin: 15% 25% 0 30%;">
+  <div class="card text-center text-white bg-danger">
+    <div class="card-body">
+      <h5 class="card-title">Error !</h5>
+      <p class="card-text alert alert-danger">{{OrdersErrMsg}}</p>
+    </div>
+  </div>
+</div>
+<div *ngIf="runSpinner" class="d-flex justify-content-center" style="margin: 15% 25% 0 30%;">
+  <div class="spinner-border" role="status">
+  </div>
+</div>
+<div class="orders" id="content" >
+  <div class="container" *ngIf="showTable">
+    <div class="card" style="border-radius: 2px;">
+      <div class="card-body main-card">
+        <div class="row">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xl-12 col-xxl-12">
+            <p class="text-center text-white" id="tableHeader">Orders of the day " {{tableDate}} "
+            </p>
+          </div>
+        </div>
+        <div class="row card-top-headers">
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xl-4 col-xxl-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title text-center">TOTAL REALISED</h5>
+                <hr>
+                <p class="text-center" id="realised"></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xl-4 col-xxl-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title text-center">CALENDER</h5>
+                <hr>
+                <p class="text-center">
+                  <input type="date" id="datePicker" #calender (change)="onChangeDate(calender.value)">
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xl-4 col-xxl-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title text-center">TOTAL UNREALISED</h5>
+                <hr>
+                <p class="text-center" id="unrealised"></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="row">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xl-12 col-xxl-12">
+            <table class="table table-borderless table-hover mt-5 mb-5" *ngFor="let table of reportKeys">
+              <tr>
+                <th class="card-header" *ngFor="let head of header">{{head}}</th>
+              </tr>
+              <tr *ngFor="let report of results[table].values">
+                <td>{{report.tradingsymbol}}</td>
+                <td>{{report.exchange_timestamp}}</td>
+                <td [ngStyle]="{'color' : 'hotpink'}">{{report.product}}</td>
+                <td>{{report.order_type}}</td>
+                <td [ngStyle]="{'color' : '#67d5e6'}">{{report.quantity}}</td>
+                <td>{{report.average_price}}</td>
+                <td>{{report.transaction_type}}</td>
+                <td *ngIf="!hideInputStopLoss">
+                  <input type="number" id={{report.order_id}} #input (click)="closeInterval()"
+                    class="getOrderID text-center" placeholder="enter value" required minlength="2">
+                  <button type="submit" class="btn btn-info ml-2 pl-2 text-center"
+                    (click)="getValue(input.id,input.value)">OK</button>
+                  <p class={{report.order_id}}></p>
+                </td>
+              </tr>
+              <tr *ngFor="let report of results[table].pnl">
+                <td colspan="1"></td>
+                <th>lastPrice : </th>
+                <td>{{report.last_price}}</td>
+                <th>realised : </th>
+                <td>{{report.realised}}</td>
+                <th>unrealised : </th>
+                <td>{{report.unrealised}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="text-white" *ngIf="checKTableDisplay && !noPending">
+          <p class="text-center showPrevious">Previous Open Orders!</p>
+        </div>
+        <div class="text-white" *ngIf="noPending && !checKTableDisplay">
+          <p class="text-center showPrevious">No Pending Orders!</p>
+        </div>
+        <div class="row">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xl-12 col-xxl-12">
+            <div *ngIf="checKTableDisplay && !noPending">
+              <table class="table table-borderless table-hover mt-5 mb-5" *ngFor="let table of reportpendingKeys">
+                <tr>
+                  <th class="card-header" *ngFor="let head of header">{{head}}</th>
+                </tr>
+                <tr *ngFor="let report of pendingData[table].values">
+                  <td>{{report.tradingsymbol}}</td>
+                  <td>{{report.exchange_timestamp}}</td>
+                  <td [ngStyle]="{'color' : 'hotpink'}">{{report.product}}</td>
+                  <td>{{report.order_type}}</td>
+                  <td [ngStyle]="{'color' : '#67d5e6'}" >{{report.quantity}}</td>
+                  <td>{{report.average_price}}</td>
+                  <td>{{report.transaction_type}}</td>
+                  <td *ngIf="!hideInputStopLoss">
+                    <input type="number" id={{report.order_id}} (click)="closeInterval()" #input
+                      class="getOrderID text-center" placeholder="enter value" required minlength="2">
+                    <button type="submit" class="btn btn-info ml-2 pl-2 text-center"
+                      (click)="getValue(input.id,input.value)">OK</button>
+                    <p class={{report.order_id}}></p>
+                  </td>
+                </tr>
+                <tr *ngFor="let report of pendingData[table].pnl">
+                  <td colspan="1"></td>
+                  <th>lastPrice : </th>
+                  <td>{{report.last_price}}</td>
+                  <th>realised : </th>
+                  <td>{{report.realised}}</td>
+                  <th>unrealised : </th>
+                  <td>{{report.unrealised}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

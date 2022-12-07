@@ -1,0 +1,110 @@
+<!-- //================== -->
+<nav class="navbar navbar-expand-lg navbar-light text-white fixed-top shadow-sm  mb-5 bg-body rounded" id="mainNav">
+
+  <div class="nav-headers">
+    <!-- <img class="img-thumbnail logo"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/2048px-Angular_full_color_logo.svg.png"
+      alt="logo"><a class="navbar-brand">DoubleMint</a> -->
+    <img class="logo" src="../assets/img/WhatsApp Image 2022-06-11 at 12.58.58 PM.jpeg" alt="logo">
+  </div>
+</nav>
+
+<div *ngIf="runSpinner" class="d-flex justify-content-center" style="margin: 15% 25% 0 30%;">
+  <div class="spinner-border" role="status">
+  </div>
+</div>
+
+<!-- Flexbox container for aligning the toasts -->
+<div *ngIf="waitingMsg" style="margin: 15% 25% 0 30%;">
+  <div class="alert alert-success d-flex align-items-center" role="alert">
+    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+      <use xlink:href="#check-circle-fill" />
+    </svg>
+    <div style="font-size: 1.5vw;" class="mb-3">
+      <p style="font-size: 2vw; margin-left: 2vw;">Hello User...</p>
+      <hr>
+      <i class="fa fa-paper-plane" aria-hidden="true"></i>
+      Link has been sent to you mail-id please check the mail!
+    </div>
+  </div>
+</div>
+
+<div class="register-photo " *ngIf="!runSpinner && !waitingMsg">
+  <div class="container">
+    <p class="alert alert-danger" *ngIf="checkPassword">* Password not matched
+    </p>
+    <p class="alert alert-info" *ngIf="emailFailed">* Invalid Email , Please try with other email id.
+    </p>
+    <p class="alert alert-danger" *ngIf="checkEmail">* Email already exists!!!
+    </p>
+  </div>
+  <div class="form-container">
+    <div class="image-holder"></div>
+    <form [formGroup]="signupform" (ngSubmit)="onSubmit()">
+      <h2 class="text-center"><strong>Let's Get Start</strong>!</h2>
+      <div class="form-group">
+        <div class="d-flex justify-content-end">
+          <i style="position: absolute" class="fa fa-exclamation-circle  mt-3" data-bs-toggle="tooltip"
+            data-bs-placement="bottom" title="
+            Must follow these instructions please
+            1.Minimum 4 characters
+            2.Must start with alphabetic character
+            3.No special characters allowed except _
+            4.Must not contain whitespaces
+            ">
+          </i>
+          <input type="text" id="" class="form-control" placeholder="username" formControlName="username" />
+        </div>
+        <div *ngIf="signupform.get('username').invalid && signupform.get('username').touched">
+          <p *ngIf="signupform.get('username').errors?.required" class="text-danger" role="alert">* Name Required</p>
+          <p *ngIf="signupform.get('username').errors?.minlength" class="text-danger" role="alert">* Please enter
+            minimum 4
+            character</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <input type="email" id="" class="form-control" placeholder="email" formControlName="email" />
+        <div *ngIf="signupform.get('email').invalid && signupform.get('email').touched">
+          <p *ngIf="signupform.get('email').errors?.required" class="text-danger" role="alert">* Email Required</p>
+          <p *ngIf="!(signupform.get('email').errors?.required) && signupform.get('email').invalid" class="text-danger"
+            role="alert">* Please enter
+            valid email-id</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="d-flex justify-content-end">
+          <i style="position: absolute" class="fa fa-exclamation-circle mt-3" data-bs-toggle="tooltip"
+            data-bs-placement="bottom" title="
+            Must follow these instructions please
+            1.Password should be atleast 6 characters long
+            2.Should contain atleast
+                one number,
+                one character,
+                one special character
+            " aria-hidden="true">
+          </i>
+          <input type="password" id="" class="form-control " placeholder="password" formControlName="password" />
+        </div>
+        <div *ngIf="signupform.get('password').invalid && signupform.get('password').touched">
+          <p *ngIf="signupform.get('password').errors?.minlength" class="text-danger" role="alert">* password must be
+            atleast 6
+            character</p>
+          <p *ngIf="signupform.get('password').touched && signupform.get('password').errors?.required"
+            class="text-danger" role="alert">* Password
+            Required</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <input type="password" id="" class="form-control" placeholder="repeat password" formControlName="reenter" />
+      </div>
+      <div class="form-group">
+        <button id="regisBTN" class="btn btn-success btn-rounded btn-block" type="submit"
+          [disabled]="!signupform.valid">Register</button>
+      </div>
+      <div class="signup">
+        <p class="text-center text-muted mt-3">Have already an account? <a class="fw-bold text-body "
+            routerLink="/login"><u class="text-primary">Login here</u></a></p>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,160 @@
+<style>
+  :host {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+</style>
+
+<div *ngIf="chartErr" style="margin: 12% 25% 0 30%;">
+  <div class="card text-center text-white bg-danger">
+    <div class="card-body">
+      <h5 class="card-title">Error !</h5>
+      <p class="card-text alert alert-danger">{{chartErrMsg}}</p>
+    </div>
+  </div>
+</div>
+<div *ngIf="isLoading" class="spinner">
+  <div class="spinner-border" role="status"></div>
+  <div class="loading" *ngIf="isLoad">
+    <p class="h3 text-white">Please wait</p>
+    <div class="spinner-border load" role="status" *ngIf="dateChangeLoading"></div>
+    <div class="spinner-grow spinner-grow-sm" role="status">
+    </div>
+    <div class="spinner-grow spinner-grow-sm" role="status">
+    </div>
+    <div class="spinner-grow spinner-grow-sm" role="status">
+    </div>
+  </div>
+</div>
+
+<div id="content">
+  <div class="container-fluid" id="display_chart">
+    <div class="row text-white">
+      <div class="col-sm-4 col md-4 col-lg-4">
+        interval : <select class="mr-5" (ngModelChange)="selectChange($event)" [ngModel]="timesDropdown">
+          <option *ngFor="let option of timesOptions" [value]="option.id">{{option.name}}</option>
+        </select>
+
+        Scale : <select (ngModelChange)="changeScale($event)" [ngModel]="defaultScale">
+          <option *ngFor="let option of scaleOptions" [value]="option.id">{{option.name}}</option>
+        </select>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-light ml-5 btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+          Show IB
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="staticBackdropLabel"
+          aria-hidden="true">
+          <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+              <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="staticBackdropLabel">IB Values</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
+                    class="bi bi-x"></i></button>
+              </div>
+              <div class="modal-body bg-dark">
+                <table class="table table-borderless text-center text-white">
+                  <tr>
+                    <th *ngFor="let head of tableHeaders">{{head}}</th>
+                  </tr>
+                  <tr>
+                    <td id="ibHigh"></td>
+                    <td id="ibLow"></td>
+                    <td id="ib"></td>
+                    <td id="ib1_5U"></td>
+                    <td id="ib2U"></td>
+                    <td id="ib3U"></td>
+                    <td id="ib1_5D"></td>
+                    <td id="ib2D"></td>
+                    <td id="ib3D"></td>
+                    <td id="w-high"></td>
+                    <td id="w-low"></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="ibhTimer"></p>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="iblTimer"></p>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="wibhTimer"></p>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="wiblTimer"></p>
+      </div>
+    </div>
+  </div>
+  <div class="ohlc-group text-white ml-5 mt-3">
+    <div>O <p id="ohlc_O"></p>
+    </div>
+    <div>H <p id="ohlc_H"></p>
+    </div>
+    <div>L <p id="ohlc_L"></p>
+    </div>
+    <div>C <p id="ohlc_C"></p>
+    </div>
+    <div>VAH <p id="VA_H"></p>
+    </div>
+    <div>VAL <p id="VA_L"></p>
+    </div>
+    <div>
+      select chart : <select class="ml-3 mr-3" (ngModelChange)="selectChart($event)" [ngModel]="chartDropdown">
+        <option *ngFor="let option of chartOptions" [value]="option.id">{{option.name}}</option>
+      </select>
+    </div>
+  </div>
+  <div id="candle-ohlc"></div>
+  <div id="chart-spinner">
+    <div class="spinner-border" role="status"></div>
+  </div>
+  <div id="candlestick">
+    <div id="candlestick-container"></div>
+  </div>
+  <div id="tooltip" class="tooltip"></div>
+
+  <svg id="liveIB">
+    <linearGradient id="line-ib1">
+      <stop offset="0" stop-color="transparent" />
+      <stop class="lineColor1" stop-color="transparent" />
+      <stop class="lineColor2" stop-color="#69fc56" />
+    </linearGradient>
+    <linearGradient id="line-ib2">
+      <stop offset="0" stop-color="transparent" />
+      <stop class="lineColor1" stop-color="transparent" />
+      <stop class="lineColor2" stop-color="yellow" />
+    </linearGradient>
+    <linearGradient id="line-ib3">
+      <stop offset="0" stop-color="transparent" />
+      <stop class="lineColor1" stop-color="transparent" />
+      <stop class="lineColor2" stop-color="#5693f5" />
+    </linearGradient>
+    <linearGradient id="line-ib4">
+      <stop offset="0" stop-color="transparent" />
+      <stop class="lineColor1" stop-color="transparent" />
+      <stop class="lineColor2" stop-color="white" />
+    </linearGradient>
+  </svg>
+  <svg id="weeklyIB">
+    <linearGradient id="WIB-High">
+      <stop offset="0" stop-color="transparent" />
+      <stop class="WIB1" stop-color="transparent" />
+      <stop class="WIB2" stop-color="hotpink" />
+    </linearGradient>
+    <linearGradient id="WIB-Low">
+      <stop offset="0" stop-color="transparent" />
+      <stop class="WIB1" stop-color="transparent" />
+      <stop class="WIB2" stop-color="blue" />
+    </linearGradient>
+  </svg>

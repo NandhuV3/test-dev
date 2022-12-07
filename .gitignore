@@ -1,0 +1,8 @@
+
+# hide modules
+node_modules
+.angular
+src/environments
+backend/config.env
+backend/candle.json
+src/assets

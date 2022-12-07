@@ -1,0 +1,44 @@
+<div class="container" style="margin-left: 15vw; margin-top: 15%;">
+  <p *ngIf="errormsg" class="alert alert-danger">Please enter valid time</p>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="card mb-5">
+        <div class="card-body">
+          <h5 class="card-title">click stop </h5>
+          <p class="card-text">you can stop whenever you want ,it will stop saving the ticks on db.</p>
+          <button class="btn btn-danger btn-block" (click)="stopCron()">Stop</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card mb-5">
+        <div class="card-body">
+          <h5 class="card-title">Set Time</h5>
+          <p class="card-text">when cron need to run.</p>
+          <form [formGroup]="cronForm" (ngSubmit)="onSubmit()">
+            <div style="display: inline-block;" class="text-center ml-5">
+              <!-- <p class="text-center">Minute</p> -->
+              Hour
+              <input type="number" minlength="1" maxlength="2" formControlName="hour" class="form-control time">
+            </div>
+            <div style="display: inline-block;" class="ml-3 text-center">
+              <!-- <p class="text-center">Hour</p> -->
+              Minute
+              <input type="number" minlength="1" maxlength="2" formControlName="minute" class="form-control mb-3 time" >
+            </div>
+            <button class="btn btn-primary btn-block" [disabled]="!cronForm.valid">Ok</button>
+          </form>
+          </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">click start</h5>
+          <p class="card-text">if you already stopped you can run again, it will start saving the ticks on db.</p>
+          <button class="btn btn-success btn-block" (click)="runCron()">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
