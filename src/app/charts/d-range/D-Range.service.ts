@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 declare const $: any;
 import { AppComponent } from '../../app.component';
 import * as d3 from 'd3';
-import { CommonService } from '../../mainService _file/common.service';
+import { CommonService } from 'src/app/mainService _file/common.service';
 
 @Injectable({
   providedIn: 'root',
@@ -35,20 +35,13 @@ export class DRangeService {
   innerWidth = this.width - this.margin.left - this.margin.right;
   innerHeight = this.height - this.margin.top - this.margin.bottom;
   rrrr: boolean = false;
+  chartData: any = [];
 
-  create_Indexed_DB() {
-    this.commonSer.indexDB_Name = this.indexDB_Name;
-    this.commonSer.createIndexed_DB();
-  }
-  close_Indexed_DB() {
-    this.commonSer.closeIndexed_DB();
-  }
-
-  updateTimeDateRange(chartData: any) {
+  updateTimeDateRange() {
     $('#ROC_vwap5').css('display', 'block');
     $('#ROC_vwap30').css('display', 'block');
 
-    const dates = chartData.map((d: any) => {
+    const dates = this.chartData.map((d: any) => {
       d.date = new Date(d.date);
       return d.date;
     });
@@ -70,7 +63,6 @@ export class DRangeService {
       .range(minDate, maxDate, 30)
       .map((d: any) => d.valueOf());
 
-    // array2.splice(-1);
     let main_arr_5 = this.get_modified_mainData(5, array1);
     let main_arr_30 = this.get_modified_mainData(30, array2);
 
@@ -92,11 +84,12 @@ export class DRangeService {
         minutes = '0' + minutes;
       }
       // ! count += 15 in 30 mins interval because we calculating ROC vwap with every 2 minutes so 30 / 2 = 15;
-
-      main_arr.push({
-        time: `${hours} : ${minutes}`,
-        value: this.ROC_arr[count].toFixed(2),
-      });
+      if (this.ROC_arr[count] != undefined) {
+        main_arr.push({
+          time: `${hours} : ${minutes}`,
+          value: this.ROC_arr[count].toFixed(2),
+        });
+      }
       count += Math.floor(num / 2);
     }
     count = null;
@@ -287,8 +280,7 @@ export class DRangeService {
   avg_14_totalVolume: number = null;
   avg_14_valueArea: number = null;
 
-  async fetchTodayData(array: any, d_15min: any, d_totalVolume: any) {
-    await this.commonSer.storeData_to_Indexed_DB(array);
+  async fetchTodayData(d_15min: any, d_totalVolume: any) {
     let modified_time = new Date();
     modified_time.setHours(new Date().getUTCHours() + 5);
     modified_time.setMinutes(new Date().getUTCMinutes() + 30);
@@ -312,19 +304,19 @@ export class DRangeService {
       this.first15_Reached = true;
     }
 
-    if (array.length > 0) {
+    if (this.chartData.length > 0) {
       if (this.withInRange) {
         $('.priceStatus').css('display', 'block');
         $('.dayPosibilities').css('display', 'block');
         $('.priceEntered').css('display', 'block');
       }
-      array.forEach((d: any) => {
+      this.chartData.forEach((d: any) => {
         this.alterVwapChangefunc(d);
         if (this.withInRange) {
           this.alterdata(d);
         }
       });
-      this.updateTimeDateRange(array);
+      this.updateTimeDateRange();
 
       if (d_15min.length != 0 && d_totalVolume.length != 0) {
         this.volumeChart = true;
@@ -350,7 +342,7 @@ export class DRangeService {
             ) / d_totalVolume.length
           ).toFixed(2)
         );
-        let lastEle: any = array.slice(-1)[0];
+        let lastEle: any = this.chartData.slice(-1)[0];
 
         this.display_first15min_volume(
           lastEle['first15MinProfile'].volume,
@@ -393,13 +385,10 @@ export class DRangeService {
           currentDate.getTime() > startTime.getTime() &&
           currentDate.getTime() < endTime.getTime()
         ) {
-          this.connectSocket(this.commonSer.vpoc_valueArea(array));
+          this.connectSocket(this.commonSer.vpoc_valueArea(this.chartData));
         }
       }
     }
-    setTimeout(() => {
-      array = null;
-    }, 10000);
   }
 
   ROC_arr: any = [];
@@ -435,23 +424,35 @@ export class DRangeService {
   first15_Reached: boolean = false;
 
   async connectSocket(array: any) {
-    let runOnce_every5min: boolean = false;
+    let currentMin: number =
+      5 * Math.floor(new Date(array.slice(-1)[0].date).getMinutes() / 5);
+
     if (this.socketConnected) {
       await this.closeSocket();
     }
     await this.$appCom.connectSocket();
-
+    let dummyArr = [];
     this.$appCom.socket.emit('candle-data', array);
     this.$appCom.socket.on('candle-ticks', async (data: any) => {
-      if (new Date(data.date).getMinutes() % 5 == 0 && !runOnce_every5min) {
-        runOnce_every5min = true;
-        this.getDataFrom_Indexed_DB();
-      } else if (
-        new Date(data.date).getMinutes() % 5 != 0 &&
-        runOnce_every5min
-      ) {
-        runOnce_every5min = false;
+      this.chartData.push(data);
+
+      let minute = 5 * Math.floor(new Date(data.date).getMinutes() / 5);
+
+      if (currentMin != minute) {
+        dummyArr.push(data);
+        if (dummyArr.length > 3) {
+          dummyArr = [];
+          currentMin = minute;
+          this.updateTimeDateRange();
+          if (this.volumeChart) {
+            this.display_day_totalVolume(
+              data.total_volume,
+              this.avg_14_totalVolume
+            );
+          }
+        }
       }
+
       this.socketConnected = true;
 
       this.alterVwapChangefunc(data);
@@ -463,25 +464,12 @@ export class DRangeService {
             this.avg_14_first15min
           );
         }
-        this.display_day_totalVolume(
-          data.total_volume,
-          this.avg_14_totalVolume
-        );
         this.display_day_valueArea(
           data['valueArea'].vah - data['valueArea'].val,
           this.avg_14_valueArea
         );
       }
-      // store in index db
-      data._id = new Date().toString();
 
-      const request = indexedDB.open(this.indexDB_Name, 1);
-      request.onsuccess = (e: any) => {
-        const db = request.result;
-        const transaction = db.transaction('data', 'readwrite');
-        const storeObj = transaction.objectStore('data');
-        storeObj.put(data);
-      };
       //show text
       $('#rate-value').text(Number(this.vwapChange.toFixed(2)));
       //color the text
@@ -498,9 +486,6 @@ export class DRangeService {
     });
   }
   indexDB_Name: string = null;
-  async getDataFrom_Indexed_DB() {
-    this.updateTimeDateRange(await this.commonSer.getDataFrom_Indexed_DB());
-  }
 
   alterdata(data: any) {
     this.estimateRange1 = data['ohlc'].high - this.range;
@@ -538,11 +523,17 @@ export class DRangeService {
       }
     } else {
       // todo : if the price entered from "above" prev day value area
-      if (data.latestTradedPrice < this.previousDay['valueArea'].vah && data.latestTradedPrice > this.previousDay['valueArea'].vah - 15) {
+      if (
+        data.latestTradedPrice < this.previousDay['valueArea'].vah &&
+        data.latestTradedPrice > this.previousDay['valueArea'].vah - 15
+      ) {
         $('#aboveBelow').text('Price entered from above VAH');
         this.outSideRange = false;
         this.withInValue = true;
-      } else if (data.latestTradedPrice > this.previousDay['valueArea'].val && data.latestTradedPrice < this.previousDay['valueArea'].val + 15) {
+      } else if (
+        data.latestTradedPrice > this.previousDay['valueArea'].val &&
+        data.latestTradedPrice < this.previousDay['valueArea'].val + 15
+      ) {
         // todo : if the price entered from "below" prev day value area
         $('#aboveBelow').text('Price entered from below VAL');
         this.outSideRange = false;
@@ -594,17 +585,3 @@ export class DRangeService {
 //    7. Price Moving outside previous value
 //  if price comes from outside value check
 //    8. the price comes from above vah or from below val
-
-//grouping
-// const g = svg
-//   .append('g')
-//   .attr(
-//     'transform',
-//     `translate(${this.margin.left},${this.margin.top + 10})`
-//   );
-
-// g.append('g')
-//   .call(xAxis)
-//   .attr('transform', `translate(0,${this.innerHeight})`);
-
-// g.append('g').call(yAxis);

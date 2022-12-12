@@ -240,10 +240,6 @@ export class OptionOfLiveComponent implements OnInit, OnDestroy {
                   this.wsService.createIndexed_db(data);
                   data = null;
                 } else {
-                  // this.callBackError('Empty content from server!');
-                  // this.logger.error(
-                  //   `ERROR IN CANDLESTICK PAGE : "Empty content from server!"`
-                  // );
                   this.getDataFromDB(
                     new Date(
                       new Date(date).setDate(new Date(date).getDate() - 1)
@@ -254,7 +250,7 @@ export class OptionOfLiveComponent implements OnInit, OnDestroy {
             },
             (err) => {
               this.callBackError(err.message);
-              this.logger.error(`ERROR IN CANDLESTICK PAGE : ${err.message}`);
+              this.logger.error(`ERROR IN option live PAGE : ${err.message}`);
             }
           );
       }
@@ -273,10 +269,6 @@ export class OptionOfLiveComponent implements OnInit, OnDestroy {
           this.wsService.createIndexed_db(data);
           data = null;
         } else {
-          // this.callBackError('Empty content from server!');
-          // this.logger.error(
-          //   `ERROR IN CANDLESTICK PAGE : Empty content from server!`
-          // );
           this.getDataFromDB(
             new Date(new Date(date).setDate(new Date(date).getDate() - 1))
           );
@@ -284,7 +276,7 @@ export class OptionOfLiveComponent implements OnInit, OnDestroy {
       },
       (err) => {
         this.callBackError(err.message);
-        this.logger.error(`ERROR IN CANDLESTICK PAGE : ${err.message}`);
+        this.logger.error(`ERROR IN option live PAGE : ${err.message}`);
       }
     );
   }

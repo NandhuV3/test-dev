@@ -4,8 +4,8 @@ const path = require("path");
 const cron = require("node-cron");
 const mongoClient = require("mongodb").MongoClient;
 require("dotenv").config({ path: path.resolve(__dirname, "./config.env") });
-// var dbURL = process.env.database_url;
-var dbURL = "mongodb://localhost:27017";
+// const dbURL = process.env.database_url;
+const dbURL = "mongodb://localhost:27017";
 let mongodb = null;
 var access_token = null;
 var instrument_token = null;
@@ -27,16 +27,16 @@ let overAll_candle_token = 0;
 connect();
 const kiteMainToken = require("./wsConnection/kiteConnect");
 async function connect() {
+  console.log("server started");
   mongoClient.connect(dbURL, async (err, result) => {
     if (err) {
-      // ....
-      // fs.appendFileSync("router/logs.txt", JSON.stringify({err : err.message}));
-    }
-    // fs.appendFileSync("router/logs.txt", JSON.stringify({time : new Date()}));
-    closeCon = result;
-    console.log("connected db");
-    mongodb = result.db("admin");
-    mongodb
+      add_error_msg_to_logger("database connection", err.message);
+    }else{
+      closeCon = result;
+      console.log("connected db");
+      mongodb = result.db("admin");
+      // add_error_msg_to_logger("server started", false);
+      mongodb
       .collection("Admin-Token")
       .find()
       .toArray(async (err, token) => {
@@ -48,6 +48,7 @@ async function connect() {
         get();
         MainFile();
       });
+    }
   });
 }
 
@@ -56,7 +57,6 @@ function get() {
 }
 function close() {
   // mongodb.close();
-  mongodb = null;
   closeCon.close();
 }
 function key(params) {
@@ -154,7 +154,6 @@ async function MainFile() {
     //for candlestick chart
     socket.on("candle-data", async (data) => {
       overAll_connectedCandle++;
-
       let volume_traded = null;
       let RSDP = null;
 
@@ -165,6 +164,7 @@ async function MainFile() {
         //connection false...
         csCon = false;
       }
+      csCon = true;
       volume_traded = data[1].total_volume;
       RSDP = new RunningSingleDayProfile(data, true);
 
@@ -173,7 +173,6 @@ async function MainFile() {
         access_token,
       });
       //connection true...
-      csCon = true;
       connectCandle.autoReconnect(true, -1, 5);
       connectCandle.connect();
       connectCandle.on("ticks", onTicks);
@@ -182,7 +181,7 @@ async function MainFile() {
       //socket error
       connectCandle.on("error", (e) => {
         close_reset_candle();
-        // fs.appendFileSync("router/logs.txt", JSON.stringify({err : e.message, time : new Date()}));
+        add_error_msg_to_logger("socket io", e.message);
       });
 
       //disconnect
@@ -193,10 +192,10 @@ async function MainFile() {
       });
 
       function onTicks(ticks) {
-        var tick = ticks[0];
+        let tick = ticks[0];
         if (tick.volume_traded > volume_traded) {
           tick.last_traded_quantity = tick.volume_traded - volume_traded;
-          // sending data to browser ...
+          // //todo : sending data to browser ...
           io.sockets.emit("candle-ticks", RSDP.singleDayProfile(tick));
           volume_traded = tick.volume_traded;
         }
@@ -208,9 +207,9 @@ async function MainFile() {
       }
     });
 
-    /////   ---------- End of candlestick socket connection ---------
+    //   ---------- //?End of candlestick socket connection ---------
 
-    /////   ---------- Beginning of instrument socket connection ---------
+    //   ---------- //?Beginning of instrument socket connection ---------
 
     socket.on("post-instrument", (data) => {
       overAll_connectedInstr++;
@@ -240,7 +239,7 @@ async function MainFile() {
       //socket error
       connectInstr.on("error", (e) => {
         close_reset_instrument();
-        // fs.appendFileSync("router/logs.txt", JSON.stringify({err : e.message, time : new Date()}));
+        add_error_msg_to_logger("socket io", e.message);
       });
 
       //disconnect
@@ -346,7 +345,7 @@ async function MainFile() {
       //socket error
       candle_token.on("error", (e) => {
         close_reset_tokens();
-        // fs.appendFileSync("router/logs.txt", JSON.stringify({err :e.message, time : new Date()}));
+        add_error_msg_to_logger("socket io", e.message);
       });
 
       candle_token.on("disconnect", () => {
@@ -378,6 +377,9 @@ async function MainFile() {
     socket.on("close-socket", function (data) {
       if (data == "candlestick") {
         overAll_connectedCandle--;
+        if(overAll_connectedCandle < 0){
+          overAll_connectedCandle = 0;
+        }
         if (overAll_connectedCandle == 0 && csCon) {
           close_reset_candle();
         }
@@ -396,4 +398,21 @@ async function MainFile() {
       }
     });
   });
+}
+
+// ! handling errors
+function add_error_msg_to_logger(message, err) {
+  fs.appendFileSync(
+    "backend/router/logs.txt",
+    JSON.stringify({
+      err: err,
+      message,
+      time: new Date(),
+    })
+  );
+  mongodb.collection('ERROR-MSG').insertOne({
+    err,
+    message,
+    time: new Date()
+  })
 }

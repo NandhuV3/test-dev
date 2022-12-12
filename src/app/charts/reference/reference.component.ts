@@ -9,7 +9,6 @@ declare var $: any;
   styleUrls: ['./reference.component.scss'],
 })
 export class ReferenceComponent implements OnInit {
-
   constructor(
     private elementRef: ElementRef,
     private $Ref_Service: ReferenceService
@@ -44,6 +43,11 @@ export class ReferenceComponent implements OnInit {
   color: string = '';
   emptyContent: boolean = false;
   emptyContentMsg: string = 'Please add labels to show!';
+  overAll_labels: any = [];
+  current_week_labels: any = [];
+  prev_week_labels: any = [];
+  daily_labels: any = [];
+  monthly_labels: any = [];
 
   totalColors: any = [];
   //color property
@@ -110,20 +114,28 @@ export class ReferenceComponent implements OnInit {
     if (Object.keys(value).length == 0) return;
     value['AlertStatus'] = 'onslider';
     value['SMS_status'] = 'off';
+    value['timestamp'] = new Date();
+    if (this.current_label_info == null) {
+      value['info'] = 'daily';
+    } else {
+      value['info'] = this.current_label_info;
+    }
+    this.current_label_info = null;
     this.changeBTN = false;
-    this.emptyContent = false;
-    if (this.lablesList.length == 0) {
-      this.lablesList.push(value);
+
+    if (this.overAll_labels.length == 0) {
+      this.overAll_labels.push(value);
       this.postLabels(value);
     } else {
       if (
-        this.lablesList.filter((item: any) => item.label == value.label)
+        this.overAll_labels.filter((item: any) => item.label == value.label)
           .length == 0
       ) {
-        this.lablesList.push(value);
-        this.lablesList = this.lablesList.sort((a: any, b: any) => {
+        this.overAll_labels.push(value);
+        this.overAll_labels = this.overAll_labels.sort((a: any, b: any) => {
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         });
+        this.repeat_changes();
         this.postLabels(value);
         this.form.resetForm();
       } else {
@@ -139,51 +151,76 @@ export class ReferenceComponent implements OnInit {
 
   //get labels from db
   async fetchLabels() {
-    this.lablesList = await this.$Ref_Service.getLabels();
-    if (this.lablesList.length == 0) this.emptyContent = true;
-    this.emptyContent = false;
-    this.lablesList.sort((a: any, b: any) => {
+    this.overAll_labels = await this.$Ref_Service.getLabels();
+    if(this.overAll_labels.length > 0){
+      this.repeat_changes();
+    }
+  }
+  repeat_changes() {
+    this.current_week_labels = [];
+    this.prev_week_labels = [];
+    this.daily_labels = [];
+    this.monthly_labels = [];
+    this.overAll_labels.sort((a: any, b: any) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
-  }
-
-  async changeStatus(obj: any) {
-    if (obj == null) return;
-    await this.$Ref_Service.updateUserLabels({
-      label: obj[0],
-      AlertStatus: obj[4],
+    this.overAll_labels.forEach((labels: any) => {
+      if (labels.info == 'monthly') {
+        this.monthly_labels.push(labels);
+      } else if (labels.info == 'prevWeek') {
+        this.prev_week_labels.push(labels);
+      } else if (labels.info == 'currentWeek') {
+        this.current_week_labels.push(labels);
+      } else {
+        this.daily_labels.push(labels);
+      }
     });
+    if (this.daily_labels.length == 0) {
+      this.emptyContent = true;
+    }else{
+      this.emptyContent = false;
+    }
+  }
+  async changeStatus(obj: any) {
+    if (Object.keys(obj).length != 0) {
+      await this.$Ref_Service.updateUserLabels({
+        label: obj.label,
+        AlertStatus: obj.AlertStatus,
+      });
+    }
   }
 
   // post the label
   async postLabels(value: any) {
-    if (value == null) return;
-    value.timestamp = new Date();
     await this.$Ref_Service.postLabels(value);
   }
 
   //delete a label
-  async deleteLabel(label: string) {
-    if (label == null) return;
-    this.lablesList = this.lablesList.filter(
-      (item: any) => item.label !== label
-    );
-    await this.$Ref_Service.deleteLabel({ label });
-    if (this.lablesList.length == 0) this.emptyContent = true;
-    this.emptyContent = false;
+  async deleteLabel(obj: any) {
+    if (Object.keys(obj).length != 0) {
+      this.overAll_labels = this.overAll_labels.filter(
+        (item: any) => item.label !== obj.label
+      );
+      await this.$Ref_Service.deleteLabel({ label: obj.label });
+      this.repeat_changes();
+    }
   }
 
   //edit and delete a label
-  async editLabel(label: any) {
-    if (label == null) return;
-    this.label = label[0];
-    this.price = label[1];
-    this.color = label[2];
-    this.date = label[3];
-    this.changeBTN = true;
-    this.lablesList = this.lablesList.filter(
-      (item: any) => item.label !== label[0]
-    );
-    await this.$Ref_Service.deleteLabel({ label: label[0] });
+  current_label_info: string = null;
+  async editLabel(obj: any) {
+    if (Object.keys(obj).length != 0) {
+      this.label = obj.label;
+      this.price = obj.price;
+      this.color = obj.color;
+      this.date = obj.date;
+      this.current_label_info = obj.info;
+      this.changeBTN = true;
+      this.overAll_labels = this.overAll_labels.filter(
+        (item: any) => item.label !== obj.label
+      );
+      this.repeat_changes();
+      await this.$Ref_Service.deleteLabel({ label: obj.label });
+    }
   }
 }

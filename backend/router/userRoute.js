@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require("../server");
 const bcrypt = require("bcryptjs");
 const path = require("path");
-require("dotenv").config({path : path.resolve(__dirname, './config.env')});
+require("dotenv").config({ path: path.resolve(__dirname, "./config.env") });
 const AWS = require("aws-sdk");
 const jwt = require("jsonwebtoken");
 var CryptoJS = require("crypto-js");
@@ -135,21 +135,23 @@ router.post("/userSignUp", async (req, res) => {
     }
   });
   router.get("/verify/:token", (req, res) => {
-
     var user_detail = jwt.verify(req.params.token, "shhhhh");
     db.get()
       .collection("client-otp")
       .find({ user_ref: user_detail.user })
       .toArray((err, result) => {
-        if (err) throw err;
-        if (result.length > 0) {
-          db.get().collection("User-SignUp").insertOne(obj);
-          db.get()
-            .collection("client-otp")
-            .deleteOne({ user_ref: result[0].user_ref });
-          res.redirect(`${origin}/login`);
+        if (err) {
+          add_error_msg_to_logger("pending", err);
         } else {
-          res.redirect(`${origin}/403Error`);
+          if (result.length > 0) {
+            db.get().collection("User-SignUp").insertOne(obj);
+            db.get()
+              .collection("client-otp")
+              .deleteOne({ user_ref: result[0].user_ref });
+            res.redirect(`${origin}/login`);
+          } else {
+            res.redirect(`${origin}/403Error`);
+          }
         }
       });
   });
@@ -158,16 +160,20 @@ router.post("/userSignUp", async (req, res) => {
 //second login form
 
 router.post("/checkSignUp", (req, res) => {
-  var email = req.body.email;
+  let email = req.body.email;
   db.get()
     .collection("User-SignUp")
-    .find({ email: email })
+    .find({ email })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result.length > 0) {
-        res.status(200).json({ result: "true" });
+      if (err) {
+        add_error_msg_to_logger("checkSignUp", err);
+        res.status(200).json({ err: err.message });
       } else {
-        res.status(200).json({ result: "false" });
+        if (result.length > 0) {
+          res.status(200).json({ result: "true" });
+        } else {
+          res.status(200).json({ result: "false" });
+        }
       }
     });
 });
@@ -183,56 +189,27 @@ router.post("/userLogin", (req, res) => {
     .collection("User-SignUp")
     .find({ email: email })
     .toArray(async (err, result) => {
-      if (err) throw err;
-
-      if (result.length > 0) {
-        let checkPWD = await bcrypt.compare(password, result[0].password);
-        if (checkPWD) {
-          if (result[0].admin == true) {
-            res.json({ admin: true });
+      if (err) {
+        add_error_msg_to_logger("userLogin", err);
+      } else {
+        if (result.length > 0) {
+          let checkPWD = await bcrypt.compare(password, result[0].password);
+          if (checkPWD) {
+            if (result[0].admin == true) {
+              res.json({ admin: true });
+            } else {
+              res.json({ admin: false });
+            }
           } else {
-            res.json({ admin: false });
+            res.json({ message: "!password" });
           }
         } else {
-          res.json({ message: "!password" });
+          res.json({ email: "error" });
         }
-      } else {
-        res.json({ email: "error" });
       }
     });
 });
 
-//==========================
-router.post("/ipAddress", async (req, res) => {
-  const query = await req.body.ip;
-  if (query != null || query != undefined) {
-    db.get()
-      .collection("IP-Address")
-      .createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 });
-    db.get()
-      .collection("IP-Address")
-      .find({ ip: query })
-      .toArray((err, result) => {
-        if (err) throw err;
-        if (result.length == 0) {
-          var expireTime = new Date();
-          expireTime.setHours(23);
-          expireTime.setMinutes(59);
-          expireTime.setSeconds(0);
-          db.get()
-            .collection("IP-Address")
-            .insertOne({
-              expireAt: new Date(expireTime),
-              ip: query,
-              time: new Date(),
-            });
-          res.status(200).json({ message: "added to db" });
-        } else {
-          res.status(200).json({ message: "already there" });
-        }
-      });
-  }
-});
 router.post("/sendCookie", async (req, res) => {
   var uniqueId = await bcrypt.hash(req.body.email, 12);
 
@@ -248,18 +225,28 @@ router.post("/checkIP", async (req, res) => {
     .collection("IP-Address")
     .find({ ip: req.body.ip })
     .toArray((err, result) => {
-      if (err) throw err;
-      res.status(200).json(result);
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 
+router.post("/login_key", (req, res) => {
+  db.get()
+    .collection("Admin-Token")
+    .find()
+    .toArray((err, result) => {
+      if (err) {
+        add_error_msg_to_logger("login_key", err);
+      } else {
+        res.status(200).json({ key: result[0].api_key });
+      }
+    });
+});
 router.post("/checkSession/", (req, res) => {
   db.get()
     .collection("Session")
     .find({ session_id: req.body.token })
     .toArray((err, result) => {
-      if (err) throw err;
-      res.status(200).json(result);
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 
@@ -274,28 +261,30 @@ router.post("/forgetPass", (req, res) => {
     .collection("User-SignUp")
     .find({ email: req.body.email })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result.length > 0) {
-        var token = jwt.sign({ user: req.body.email }, "shhhhh");
-        const ses = new AWS.SES({
-          accessKeyId,
-          secretAccessKey,
-          region,
-        });
-        var senderMail = sender_mail;
+      if (err) {
+        add_error_msg_to_logger("forgetPass", err);
+      } else {
+        if (result.length > 0) {
+          var token = jwt.sign({ user: req.body.email }, "shhhhh");
+          const ses = new AWS.SES({
+            accessKeyId,
+            secretAccessKey,
+            region,
+          });
+          var senderMail = sender_mail;
 
-        let params = {
-          Destination: {
-            /* required */
-            ToAddresses: [req.body.email],
-          },
-          Message: {
-            /* required */
-            Body: {
+          let params = {
+            Destination: {
               /* required */
-              Html: {
-                Charset: "UTF-8",
-                Data: `<div class="card text-center">
+              ToAddresses: [req.body.email],
+            },
+            Message: {
+              /* required */
+              Body: {
+                /* required */
+                Html: {
+                  Charset: "UTF-8",
+                  Data: `<div class="card text-center">
                 <div class="card-header">
                   Hello User!
                 </div>
@@ -308,19 +297,19 @@ router.post("/forgetPass", (req, res) => {
                   Thankyou
                 </div>
               </div>`,
+                },
+              },
+              Subject: {
+                Charset: "UTF-8",
+                Data: "email verification to reset password",
               },
             },
-            Subject: {
-              Charset: "UTF-8",
-              Data: "email verification to reset password",
-            },
-          },
-          Source: senderMail,
-          /* required */
-          ReplyToAddresses: [senderMail],
-        };
+            Source: senderMail,
+            /* required */
+            ReplyToAddresses: [senderMail],
+          };
 
-        /* var obj = {
+          /* var obj = {
           date: new Date(),
           username: req.body.username,
           email: req.body.email,
@@ -329,26 +318,26 @@ router.post("/forgetPass", (req, res) => {
           admin: false,
         }; */
 
-        // this sends the email
-        ses.sendEmail(params, (err, data) => {
-          if (err) {
-            res.json({ message: "true" });
-          } else {
-            db.get()
-              .collection("client-otp")
-              .createIndex({ createdAt: 1 }, { expireAfterSeconds: 840 });
-            db.get()
-              .collection("client-otp")
-              .insertOne({ createdAt: new Date(), user_ref: req.body.email });
-          }
-        });
-        res.json({ message: "true" });
-      } else {
-        res.status(200).json({ message: "false" });
+          // this sends the email
+          ses.sendEmail(params, (err, data) => {
+            if (err) {
+              res.json({ message: "true" });
+            } else {
+              db.get()
+                .collection("client-otp")
+                .createIndex({ createdAt: 1 }, { expireAfterSeconds: 840 });
+              db.get()
+                .collection("client-otp")
+                .insertOne({ createdAt: new Date(), user_ref: req.body.email });
+            }
+          });
+          res.json({ message: "true" });
+        } else {
+          res.status(200).json({ message: "false" });
+        }
       }
     });
 });
-
 
 router.get("/updateUser/:token", (req, res) => {
   var user_detail = jwt.verify(req.params.token, "shhhhh");
@@ -357,14 +346,17 @@ router.get("/updateUser/:token", (req, res) => {
     .collection("client-otp")
     .find({ user_ref: user_detail.user })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result.length > 0) {
-        db.get()
-          .collection("client-otp")
-          .deleteOne({ user_ref: result[0].user_ref });
-        res.redirect(`${origin}/passwordReset?email=${user_detail.user}`);
+      if (err) {
+        add_error_msg_to_logger("updateUser  token ", err);
       } else {
-        res.redirect(`${origin}/403Error`);
+        if (result.length > 0) {
+          db.get()
+            .collection("client-otp")
+            .deleteOne({ user_ref: result[0].user_ref });
+          res.redirect(`${origin}/passwordReset?email=${user_detail.user}`);
+        } else {
+          res.redirect(`${origin}/403Error`);
+        }
       }
     });
 });
@@ -387,4 +379,38 @@ router.post("/updatePassword", async (req, res) => {
     );
   res.json({ message: "true" });
 });
+
+function send_it_to_browser(err, result, message, res) {
+  if (err) {
+    // ! if error store it in logs
+    fs.appendFileSync(
+      "router/logs.txt",
+      JSON.stringify({
+        err: err.message,
+        message,
+        time: new Date(),
+      })
+    );
+    res.status(200).json({ err: err.message });
+  } else {
+    res.status(200).json(result);
+  }
+}
+
+// todo : error function
+function add_error_msg_to_logger(message, err) {
+  fs.appendFileSync(
+    "router/logs.txt",
+    JSON.stringify({
+      err: err.message,
+      message,
+      time: new Date(),
+    })
+  );
+  db.get().collection('ERROR-MSG').insertOne({
+    err : err.message,
+    message,
+    time: new Date()
+  })
+}
 module.exports = router;

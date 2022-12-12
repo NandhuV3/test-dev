@@ -24,11 +24,9 @@ export class DRangeComponent implements OnInit, OnDestroy {
     this.elementRef.nativeElement.ownerDocument.body.style.backgroundColor =
       '#0f162e';
     this.RangeService.indexDB_Name = this.indexDB_Name;
-    this.RangeService.create_Indexed_DB();
   }
 
   @HostListener('window:beforeunload') async onBeforeUnload() {
-    this.RangeService.close_Indexed_DB();
     await this.RangeService.closeSocket();
   }
 
@@ -138,13 +136,14 @@ export class DRangeComponent implements OnInit, OnDestroy {
       );
 
       if (fulldata.length > 0) {
+        this.RangeService.chartData = fulldata;
         if (new Date().getDay() >= 1 && new Date().getDay() <= 5) {
-          this.RangeService.fetchTodayData(fulldata, last_14_days_First15min,last_14_days_totalVolume);
+          this.RangeService.fetchTodayData(last_14_days_First15min,last_14_days_totalVolume);
           fulldata = null;
           last_14_days_First15min = null;
           last_14_days_totalVolume = null;
         } else {
-          this.RangeService.fetchTodayData(fulldata, last_14_days_First15min,last_14_days_totalVolume);
+          this.RangeService.fetchTodayData(last_14_days_First15min,last_14_days_totalVolume);
           fulldata = null;
           last_14_days_First15min = null;
           last_14_days_totalVolume = null;
@@ -154,7 +153,6 @@ export class DRangeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnDestroy() {
-    this.RangeService.close_Indexed_DB();
     await this.RangeService.closeSocket();
   }
 }

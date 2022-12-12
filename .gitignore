@@ -6,3 +6,7 @@ src/environments
 backend/config.env
 backend/candle.json
 src/assets
+backend/description.txt
+backend/spec
+backend/angular
+

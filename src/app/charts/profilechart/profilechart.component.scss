@@ -33,28 +33,18 @@ div.tooltip {
   opacity: 0;
 }
 
-.spinner-border {
-  margin-top: 100px;
-  margin-left: 50%;
-}
-
-.spinner p {
-  margin-top: 20px;
-  display: inline-block;
-  margin-left: 45%;
-}
-
-.spinner-grow {
-  margin: 0 3px;
-  height: 0.3rem;
-  width: 0.3rem;
-  color: blue;
-}
 .interval{
-  display: flex;
+  display: none;
   color: white;
   cursor: pointer;
 }
 .active{
   color: red;
+}
+
+
+.spinner-border{
+  color: #fff;
+  margin-top: 30vh;
+  margin-left: 50%;
 }

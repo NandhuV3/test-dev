@@ -71,7 +71,7 @@ export class OrdersComponent implements OnInit, AfterViewInit, OnDestroy {
   checKTableDisplay = false;
   storeObj: any = [];
   hideInputStopLoss: boolean = false;
-  ipAddress: any = null;
+
   checkLtp: boolean = false;
   MarketStartTime: any = null;
   MarketEndTime: any = null;
@@ -98,14 +98,8 @@ export class OrdersComponent implements OnInit, AfterViewInit, OnDestroy {
     this.firstFun();
   }
 
-  async getIpAddress() {
-    this.ipAddress = await this.http
-      .get<{ ip: string }>('https://api.ipify.org/?format=json')
-      .toPromise();
-  }
-
   async firstFun() {
-    await this.getIpAddress();
+
     // var controlTime: any;
     // if (document.cookie != '') {
     //   document.getElementById('orders').style.marginLeft = '15vw';
@@ -127,16 +121,7 @@ export class OrdersComponent implements OnInit, AfterViewInit, OnDestroy {
     // }
     // getIP time in DB
     /* if (document.cookie == '') {
-      var dbIP: any = await this.http
-        .post(USER_URL + 'checkIP' ,{ ip : this.ipAddress.ip})
-        .toPromise();
 
-      if (dbIP.length == 0) {
-        await this.http
-          .post(USER_URL + 'ipAddress', this.ipAddress, {
-            responseType: 'text',
-          })
-          .toPromise();
           var runWithAdminToken:any = await this.http.post(BACKEND_URL + 'userAdmin',{},{responseType: 'text'}).toPromise();
           if(runWithAdminToken == "OK"){
             this.callOrders();
@@ -148,9 +133,7 @@ export class OrdersComponent implements OnInit, AfterViewInit, OnDestroy {
             }, 10 * 60000);
           }
       } else {
-        var dbIP: any = await this.http
-          .post(USER_URL + 'checkIP' ,{ ip : this.ipAddress.ip})
-          .toPromise();
+
         var ipTime = new Date(dbIP[0].time);
         var AddedTime: any = new Date(ipTime).setMinutes(
           new Date(ipTime).getMinutes() + 10

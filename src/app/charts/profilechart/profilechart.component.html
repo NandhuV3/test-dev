@@ -1,13 +1,13 @@
 <style>
-    :host {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-      font-size: 14px;
-      color: #333;
-      box-sizing: border-box;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-  </style>
+  :host {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+</style>
 <div *ngIf="chartErr" style="margin: 12% 25% 0 30%;">
   <div class="card text-center text-white bg-danger">
     <div class="card-body">
@@ -16,33 +16,23 @@
     </div>
   </div>
 </div>
-<div *ngIf="isLoading" class="spinner">
-  <div class="spinner-border text-white" role="status"></div>
-  <div class="loading">
-    <p class="h3 text-white">Please wait</p>
-    <div class="spinner-grow spinner-grow-sm" role="status">
-    </div>
-    <div class="spinner-grow spinner-grow-sm" role="status">
-    </div>
-    <div class="spinner-grow spinner-grow-sm" role="status">
-    </div>
-  </div>
-</div>
 
-  <div id="content">
-    <div class="container-fluid" *ngIf="!isLoading && !chartErr">
-      <div class="row">
-        <div class="col-sm-4 col md-4 col-lg-4 interval">
-          <p id="checkday" class="ml-5 active" (click)="selectChange('day')">Day</p>
-          <p id="checkweek" class="ml-5" (click)="selectChange('week')">Weekly</p>
-        </div>
+<div id="content">
+  <div class="container-fluid" *ngIf="!chartErr">
+    <div class="row">
+      <div class="col-sm-4 col md-4 col-lg-4 interval">
+        <p id="checkday" class="ml-5 active" (click)="selectChange('day')">Day</p>
+        <p id="checkweek" class="ml-5" (click)="selectChange('week')">Weekly</p>
       </div>
     </div>
-    <div id="candlestick">
-      <div id="candlestick-container"></div>
-     </div>
-     <div id="tooltip" class="tooltip"></div>
   </div>
 
+  <div id="chart-spinner">
+    <div class="spinner-border" role="status"></div>
+  </div>
 
-
+  <div id="candlestick">
+    <div id="candlestick-container"></div>
+  </div>
+  <div id="tooltip" class="tooltip"></div>
+</div>

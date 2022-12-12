@@ -13,7 +13,7 @@ declare const $: any;
 @Injectable({
   providedIn: 'root',
 })
-export class ProfileServiceService {
+export class TestPG_Service {
   constructor(
     private apiService: ApiService,
     private http: HttpClient,
@@ -694,32 +694,30 @@ export class ProfileServiceService {
   today_Data: any = null;
 
   async renderLayout() {
-    // mainData is the db data
     this.chartData = this.mainData;
+    this.socketBool = true;
 
-    //chartData is a copy of maindata we can modify and use it
+    this.chartData.pop();
     let vpoc_va_arr: any = null;
-
     if (this.socketBool) {
       let date = moment(new Date()).format('YYYY-MM-DD');
       this.today_Data = await this.http
         .post(BACKEND_URL + 'chart-data', { date })
         .toPromise();
-
-      vpoc_va_arr = this.commonSer.vpoc_valueArea(this.today_Data);
-
-      let lastObj: any = {
-        date: vpoc_va_arr[1].date,
-        total_volume: vpoc_va_arr[1].total_volume,
-        volumePOC: vpoc_va_arr[1].volumePOC,
-        valueArea: vpoc_va_arr[1].valueArea,
-        ohlc: vpoc_va_arr[1].ohlc,
-        overAll_price: vpoc_va_arr[0].obj,
-        vwap: vpoc_va_arr[1].vwap,
-      };
-
-      this.chartData.push(lastObj);
     }
+    vpoc_va_arr = this.commonSer.vpoc_valueArea(this.today_Data.slice(0, 100));
+
+    let lastObj: any = {
+      date: vpoc_va_arr[1].date,
+      total_volume: this.today_Data[100].total_volume,
+      volumePOC: vpoc_va_arr[1].volumePOC,
+      valueArea: vpoc_va_arr[1].valueArea,
+      ohlc: this.today_Data[100].ohlc,
+      overAll_price: vpoc_va_arr[0].obj,
+      vwap: vpoc_va_arr[1].vwap,
+    };
+
+    this.chartData.push(lastObj);
 
     let dataObj = [];
     let chartArr = [];
@@ -818,13 +816,11 @@ export class ProfileServiceService {
   socket_ID: any;
   indexDB_Name: string = null;
   async connectSocket(array: any) {
-    if (this.socketConnected) {
-      await this.closeSocket;
-    }
-    this.$appCom.connectSocket();
+    let i = 100;
+    setInterval(() => {
+      let data = this.today_Data[i];
+      i++;
 
-    this.$appCom.socket.emit('candle-data', array);
-    this.$appCom.socket.on('candle-ticks', (data: any) => {
       this.socketConnected = true;
       data['volumePOC'].price = Number(data['volumePOC'].price);
 
@@ -852,10 +848,7 @@ export class ProfileServiceService {
 
       this.updateTablelayout();
       this.update_every_position();
-    });
-    setTimeout(() => {
-      array = null;
-    }, 5000);
+    }, 500);
   }
 
   main_zoom_event() {

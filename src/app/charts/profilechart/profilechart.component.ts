@@ -10,6 +10,7 @@ import { ProfileServiceService } from './profile-service.service';
 import { environment } from '../../../environments/environment';
 import { NGXLogger } from 'ngx-logger';
 import { CommonService } from 'src/app/mainService _file/common.service';
+import { TestPG_Service } from './test-profile.service';
 declare const $: any;
 
 const BACKEND_URL = environment.apiUrl + '/api/';
@@ -20,25 +21,21 @@ const BACKEND_URL = environment.apiUrl + '/api/';
   styleUrls: ['./profilechart.component.scss'],
 })
 export class ProfilechartComponent implements OnInit, OnDestroy {
-  isLoading = false;
   chartErr: boolean = false;
   chartErrMsg: string = '';
   indexDB_Name: string = 'profilechart';
   constructor(
     private pgService: ProfileServiceService,
+    // private pgService: TestPG_Service,
     private http: HttpClient,
     private elementRef: ElementRef,
-    private logger: NGXLogger,
-    private commonSer: CommonService
+    private logger: NGXLogger
   ) {
     this.elementRef.nativeElement.ownerDocument.body.style.backgroundColor =
       '#08102e';
-    this.commonSer.indexDB_Name = this.indexDB_Name;
-    this.commonSer.createIndexed_DB();
   }
 
   @HostListener('window:beforeunload') async onBeforeUnload() {
-    this.commonSer.closeIndexed_DB();
     await this.pgService.closeSocket();
   }
 
@@ -48,7 +45,10 @@ export class ProfilechartComponent implements OnInit, OnDestroy {
     this.connect();
   }
   async selectChange(dateEvent: any) {
-    document.getElementById('candlestick-container').style.display = 'none';
+    $('#chart-spinner').css('display', 'block');
+    $('.interval').css('display', 'none');
+    $('#candlestick-container').css('display', 'none');
+
     if (dateEvent == 'day') {
       $('#checkweek').removeClass('active');
       $('#checkday').addClass('active');
@@ -58,22 +58,18 @@ export class ProfilechartComponent implements OnInit, OnDestroy {
       $('#checkweek').addClass('active');
       this.pgService.weeklyChart = true;
     }
-    let data: any = await this.commonSer.getDataFrom_Indexed_DB();
-    this.pgService.chartData = data;
     this.pgService.renderLayout();
-    data = null;
   }
 
   async connect() {
+    $('#candlestick-container').css('display', 'none');
     this.pgService.indexDB_Name = this.indexDB_Name;
-    this.isLoading = true;
+
     // this.http.post(BACKEND_URL + 'NSE-DAY-PROFILE', {}).subscribe(
     this.http.post(BACKEND_URL + 'GET-WHOLE-VA', {}).subscribe(
       async (result: any) => {
         if (result.length > 1) {
-          await this.commonSer.storeData_to_Indexed_DB(result);
-
-          this.pgService.chartData = result;
+          this.pgService.mainData = result;
           let modified_time = new Date();
           modified_time.setHours(new Date().getUTCHours() + 5);
           modified_time.setMinutes(new Date().getUTCMinutes() + 30);
@@ -104,7 +100,6 @@ export class ProfilechartComponent implements OnInit, OnDestroy {
             this.pgService.renderLayout();
           }
 
-          this.isLoading = false;
           result = null;
         } else {
           this.callBackError('Empty content from server!');
@@ -122,10 +117,8 @@ export class ProfilechartComponent implements OnInit, OnDestroy {
   callBackError(message: any) {
     this.chartErrMsg = message;
     this.chartErr = true;
-    this.isLoading = false;
   }
   async ngOnDestroy() {
-    this.commonSer.closeIndexed_DB();
     await this.pgService.closeSocket();
   }
 }

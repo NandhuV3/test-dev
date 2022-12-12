@@ -16,7 +16,6 @@ declare var $: any;
   styleUrls: ['./tick-chart.component.scss'],
 })
 export class TickChartComponent implements OnInit, OnDestroy {
-  isLoading: boolean = false;
   dateChangeLoading: boolean = false;
   timeErr: boolean = false;
   MarketEndTime: any;
@@ -157,8 +156,6 @@ export class TickChartComponent implements OnInit, OnDestroy {
 
     this.wsService.mergedArray = [];
     this.wsService.mergedObj = {};
-    document.getElementById('candlestick-container').style.display = 'none';
-    this.isLoading = true;
     this.timesDropdown = dateEvent;
     if (dateEvent == 15 || dateEvent == 30) {
       this.defaultScale = 10;
@@ -174,9 +171,7 @@ export class TickChartComponent implements OnInit, OnDestroy {
       this.wsService.selectScale = 5;
     }
     this.wsService.selectTimeMinute = dateEvent;
-    this.isLoading = false;
     this.wsService.getDataFrom_Indexed_DB();
-    document.getElementById('candlestick-container').style.display = 'block';
   }
 
   //while changing scale
@@ -187,10 +182,11 @@ export class TickChartComponent implements OnInit, OnDestroy {
   }
   //while changing date
   async onDateChange(date: string) {
+    $('#candlestick-container').css('display', 'none');
+    $('#chart-spinner').css('display', 'block');
     this.wsService.clear_indexed_DB();
     d3.selectAll('svg.baseSVG').remove();
     await this.wsService.closeSocket(true);
-    this.isLoading = true;
     this.wsService.renderSVG();
     this.getDataFromDB(date);
   }
@@ -259,7 +255,6 @@ export class TickChartComponent implements OnInit, OnDestroy {
   callBackError(message: any) {
     this.chartErrMsg = message;
     this.chartErr = true;
-    this.isLoading = false;
   }
   ngOnDestroy(): void {
     this.wsService.closeSocket(true);

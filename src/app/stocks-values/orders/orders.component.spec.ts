@@ -83,17 +83,7 @@ describe('OrdersComponent', () => {
     expect(component.firstFun).toHaveBeenCalled();
     expect(component.firstFun).toHaveBeenCalledTimes(1);
   })
-  xit("main function should run getIP address func",fakeAsync(()=>{
-    spyOn(component, 'getIpAddress');
-    component.firstFun();
-    expect(component.getIpAddress).toHaveBeenCalled();
-    expect(component.getIpAddress).toHaveBeenCalledTimes(1);
-    tick();
-    const httpIPaddress = httpController.expectOne("https://api.ipify.org/?format=json")
-    expect(httpIPaddress.request.method).toEqual("GET");
-    const userAdmin = httpController.expectOne("http://localhost:4040/api/userAdmin")
-    expect(userAdmin.request.method).toEqual("POST");
-  }));
+
   it('check showOrders func working in weekly days', () => {
     spyOn(component, 'showOrders');
     spyOn(component, 'SatAndSun');

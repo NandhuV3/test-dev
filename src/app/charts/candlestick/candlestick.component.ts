@@ -8,6 +8,7 @@ import {
 import { SocketService } from '../../mainService _file/socket.service';
 import * as moment from 'moment';
 import { NGXLogger } from 'ngx-logger';
+declare const $: any;
 
 @Component({
   selector: 'app-candlestick',
@@ -52,7 +53,7 @@ export class CandlestickComponent implements OnInit, OnDestroy {
     { id: 20, name: '20' },
   ];
   //indexed db name
-  indexDB_Name: string = 'candlechart';
+  indexDB_Name: string = 'candlechart1';
   backendData: any = [];
   constructor(
     private wsService: SocketService,
@@ -86,8 +87,10 @@ export class CandlestickComponent implements OnInit, OnDestroy {
     }
     this.wsService.mergedArray = [];
     this.wsService.mergedObj = {};
-    document.getElementById('candlestick-container').style.display = 'none';
-    this.isLoading = true;
+    $('#display_chart').css('display', 'none');
+    $('#candlestick-container').css('display', 'none');
+    $('#chart-spinner').css('display', 'block');
+    $('.ohlc-group').css('display', 'none');
     this.wsService.closeSocket(false);
 
     this.timesDropdown = dateEvent;
@@ -105,7 +108,6 @@ export class CandlestickComponent implements OnInit, OnDestroy {
       this.wsService.selectScale = 5;
     }
     this.wsService.selectTimeMinute = dateEvent;
-    this.isLoading = false;
     this.wsService.getDataFrom_Indexed_DB();
   }
 
@@ -239,8 +241,6 @@ export class CandlestickComponent implements OnInit, OnDestroy {
     await this.wsService.closeSocket(true);
   }
 }
-
-
 
 /*
 if content = empty

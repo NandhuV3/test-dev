@@ -43,7 +43,6 @@ export class SocketService {
   socketConnected: boolean = false;
   socketBool: boolean = false;
   emptyFinalObj: boolean = false;
-  simpleData: any = {};
   //
   ibStartTime: any;
   ibAfterFirst5hr: any;
@@ -148,28 +147,36 @@ export class SocketService {
     return this.http.post(BACKEND_URL + 'instrument-list', {});
   }
   weeklyIBdata(date: any) {
-    this.http
-      .post(BACKEND_URL + 'weeklyIB_Timer', { date })
-      .subscribe((data: any) => {
+    this.http.post(BACKEND_URL + 'weeklyIB_Timer', { date }).subscribe(
+      (data: any) => {
         if (data.length > 0) {
           this.db_wib_h = data[0].weeklyIB_high;
           this.db_wib_l = data[0].weeklyIB_low;
         }
-      });
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
   }
 
   lablesList: any[];
   fetchLabels() {
-    this.http.post(BACKEND_URL + 'getLabels', {}).subscribe((data: any) => {
-      if (data.length > 0) {
-        this.lablesList = data;
-        data.forEach((d: any) => {
-          if (d.AlertStatus == 'offslider') {
-            this.blinkedPrices.push(d);
-          }
-        });
+    this.http.post(BACKEND_URL + 'getLabels', {}).subscribe(
+      (data: any) => {
+        if (data.length > 0) {
+          this.lablesList = data;
+          data.forEach((d: any) => {
+            if (d.AlertStatus == 'offslider') {
+              this.blinkedPrices.push(d);
+            }
+          });
+        }
+      },
+      (err) => {
+        console.log(err);
       }
-    });
+    );
   }
 
   toggleFunction: boolean = false;
@@ -545,66 +552,75 @@ export class SocketService {
       //assigning the value
       this.filterData[element] = subObj;
       //finfing value area for each element
-      this.filterData[element].data.forEach((data: any) => {
-        var last_price: number = 2 * Math.round(data.latestTradedPrice / 2);
+      if (this.filterData[element].data.length > 0) {
+        this.filterData[element].data.forEach((data: any) => {
+          var last_price: number = 2 * Math.round(data.latestTradedPrice / 2);
 
-        if (
-          Object.keys(this.vahvalValue).indexOf(last_price.toString()) != -1
-        ) {
-          this.vahvalValue[last_price] += data.lastTradedQuantity;
-        } else {
-          this.vahvalValue[last_price] = data.lastTradedQuantity;
+          if (
+            Object.keys(this.vahvalValue).indexOf(last_price.toString()) != -1
+          ) {
+            this.vahvalValue[last_price] += data.lastTradedQuantity;
+          } else {
+            this.vahvalValue[last_price] = data.lastTradedQuantity;
+          }
+        });
+
+        var highVol_price: any = Object.keys(this.vahvalValue).reduce(
+          (a: any, b: any) =>
+            this.vahvalValue[a] > this.vahvalValue[b] ? a : b
+        );
+
+        var total_volume: any = Object.values(this.vahvalValue).reduce(
+          (a: number, b: number) => a + b
+        );
+
+        var valueAreaVolume: number = Number(this.vahvalValue[highVol_price]);
+        var oneUpPrice: number = Number(highVol_price);
+        var oneDownPrice: number = Number(highVol_price);
+        var vah: number = Number(highVol_price);
+        var val: number = Number(highVol_price);
+        var oneUpVolume: number = 0;
+        var oneDownVolume: number = 0;
+        var f = Object.keys(this.vahvalValue).indexOf(highVol_price.toString());
+        var i = 1;
+        var j = 1;
+        while (valueAreaVolume / total_volume < 0.7) {
+          oneUpPrice = Number(Object.keys(this.vahvalValue)[f + i]);
+          oneDownPrice = Number(Number(Object.keys(this.vahvalValue)[f - j]));
+          oneUpVolume = this.vahvalValue[oneUpPrice];
+          oneDownVolume = this.vahvalValue[oneDownPrice];
+
+          if (oneUpVolume == undefined) {
+            oneUpVolume = 0;
+          }
+          if (oneDownVolume == undefined) {
+            oneDownVolume = 0;
+          }
+          if (oneUpVolume > oneDownVolume) {
+            i++;
+            vah = Number(oneUpPrice);
+            oneDownPrice = oneDownPrice + 2;
+            valueAreaVolume += Number(oneUpVolume);
+          } else {
+            j++;
+            valueAreaVolume += Number(oneDownVolume);
+            val = Number(oneDownPrice);
+            oneUpPrice = oneUpPrice + 2;
+          }
         }
-      });
-
-      var highVol_price: any = Object.keys(this.vahvalValue).reduce(
-        (a: any, b: any) => (this.vahvalValue[a] > this.vahvalValue[b] ? a : b)
-      );
-
-      var total_volume: any = Object.values(this.vahvalValue).reduce(
-        (a: number, b: number) => a + b
-      );
-
-      var valueAreaVolume: number = Number(this.vahvalValue[highVol_price]);
-      var oneUpPrice: number = Number(highVol_price);
-      var oneDownPrice: number = Number(highVol_price);
-      var vah: number = Number(highVol_price);
-      var val: number = Number(highVol_price);
-      var oneUpVolume: number = 0;
-      var oneDownVolume: number = 0;
-      var f = Object.keys(this.vahvalValue).indexOf(highVol_price.toString());
-      var i = 1;
-      var j = 1;
-      while (valueAreaVolume / total_volume < 0.7) {
-        oneUpPrice = Number(Object.keys(this.vahvalValue)[f + i]);
-        oneDownPrice = Number(Number(Object.keys(this.vahvalValue)[f - j]));
-        oneUpVolume = this.vahvalValue[oneUpPrice];
-        oneDownVolume = this.vahvalValue[oneDownPrice];
-
-        if (oneUpVolume == undefined) {
-          oneUpVolume = 0;
-        }
-        if (oneDownVolume == undefined) {
-          oneDownVolume = 0;
-        }
-        if (oneUpVolume > oneDownVolume) {
-          i++;
-          vah = Number(oneUpPrice);
-          oneDownPrice = oneDownPrice + 2;
-          valueAreaVolume += Number(oneUpVolume);
-        } else {
-          j++;
-          valueAreaVolume += Number(oneDownVolume);
-          val = Number(oneDownPrice);
-          oneUpPrice = oneUpPrice + 2;
-        }
+        this.filterData[element].valueArea = {
+          vah: vah,
+          val: val,
+          valueAreaVolume: valueAreaVolume,
+        };
       }
-      this.filterData[element].valueArea = {
-        vah: vah,
-        val: val,
-        valueAreaVolume: valueAreaVolume,
-      };
     });
+    Object.keys(this.filterData).forEach((d) => {
+      if (this.filterData[d].data.length == 0) {
+        delete this.filterData[d];
+      }
+    });
+    this.timeRangeData = Object.keys(this.filterData);
     chartData = null;
   }
 
@@ -905,7 +921,6 @@ export class SocketService {
           sideRect.exit().remove();
         }
 
-        // if (self.selectTimeMinute != 1440) {
         const left: any = Object.keys(d.left).map(Number);
         const right: any = Object.keys(d.right).map(Number);
 
@@ -913,25 +928,19 @@ export class SocketService {
           if (left.indexOf(i) == -1) {
             d.left[i] = { latestTradedPrice: i, key: Number(i), val: 0 };
           }
+          if (right.indexOf(i) == -1) {
+            d.right[i] = { latestTradedPrice: i, key: i, val: 0 };
+          }
         }
         for (let i = right[0]; i <= right.slice(-1)[0]; i += self.istep) {
           if (right.indexOf(i) == -1) {
             d.right[i] = { latestTradedPrice: i, key: Number(i), val: 0 };
           }
+          if (left.indexOf(i) == -1) {
+            d.left[i] = { latestTradedPrice: i, key: i, val: 0 };
+          }
         }
-        //left // adding zero on empty spaces
 
-        left.forEach((l: any) => {
-          if (right.indexOf(l) == -1) {
-            d.right[l] = { latestTradedPrice: l, key: Number(l), val: 0 };
-          }
-        });
-        //right // adding zero on empty spaces
-        right.forEach((r: any) => {
-          if (left.indexOf(r) == -1) {
-            d.left[r] = { latestTradedPrice: r, key: Number(r), val: 0 };
-          }
-        });
         // assigning value area
         const vahavalcandles = ele.selectAll('.vahvalcandle').data([d]);
         vahavalcandles
@@ -1168,31 +1177,25 @@ export class SocketService {
             .text((d) => d.value);
           sideRect.exit().remove();
         }
-        // if (self.selectTimeMinute != 1440) {
-        const left = Object.keys(d.left).map(Number);
-        const right = Object.keys(d.right).map(Number);
+        const left: any = Object.keys(d.left).map(Number);
+        const right: any = Object.keys(d.right).map(Number);
+
         for (let i = left[0]; i <= left.slice(-1)[0]; i += self.istep) {
           if (left.indexOf(i) == -1) {
             d.left[i] = { latestTradedPrice: i, key: Number(i), val: 0 };
+          }
+          if (right.indexOf(i) == -1) {
+            d.right[i] = { latestTradedPrice: i, key: i, val: 0 };
           }
         }
         for (let i = right[0]; i <= right.slice(-1)[0]; i += self.istep) {
           if (right.indexOf(i) == -1) {
             d.right[i] = { latestTradedPrice: i, key: Number(i), val: 0 };
           }
+          if (left.indexOf(i) == -1) {
+            d.left[i] = { latestTradedPrice: i, key: i, val: 0 };
+          }
         }
-        //left // adding zero on empty spaces
-        left.forEach((l) => {
-          if (right.indexOf(l) == -1) {
-            d.right[l] = { latestTradedPrice: l, key: Number(l), val: 0 };
-          }
-        });
-        //right // adding zero on empty spaces
-        right.forEach((r) => {
-          if (left.indexOf(r) == -1) {
-            d.left[r] = { latestTradedPrice: r, key: Number(r), val: 0 };
-          }
-        });
 
         // assigning value area
         const vahavalcandles = ele.selectAll('.vahvalcandle').data([d]);
@@ -1604,14 +1607,12 @@ export class SocketService {
       .attr('font-family', 'Poppins');
     text2.exit().remove();
   }
-
+  overAll_sideBar: any = [];
   updateSide_vpoc_bar() {
     // volume bar
-    let vpocContent: any = JSON.parse(sessionStorage.getItem('vpocObj'));
-
     this.vScaleX = d3
       .scaleLinear()
-      .domain(d3.extent(Object.values(vpocContent), (d) => d))
+      .domain(d3.extent(Object.values(this.overAll_sideBar), (d) => d))
       .range([0, 100]);
     this.chartBody.selectAll('.vAxisX').remove();
     this.chartBody
@@ -1624,7 +1625,7 @@ export class SocketService {
     //yscale for volume
     this.vScaleY = d3
       .scaleBand()
-      .domain(Object.keys(vpocContent).map((d) => d))
+      .domain(Object.keys(this.overAll_sideBar).map((d) => d))
       .range([this.height - this.tableHeight, 0])
       .padding(0.2);
     this.chartBody
@@ -1632,10 +1633,10 @@ export class SocketService {
       .attr('class', 'vAxisY')
       .call(d3.axisLeft(this.vScaleY));
     this.chartBody.selectAll('.vAxisY').remove();
-    const arrayOfObj = Object.entries(vpocContent).map((e) => ({
+    const arrayOfObj = Object.entries(this.overAll_sideBar).map((e) => ({
       [e[0]]: e[1],
     }));
-    vpocContent = null;
+
     this.chartBody.selectAll('.vAxisY .tick line').remove();
     this.chartBody.selectAll('.vAxisY .domain, .tick text').remove();
     d3.selectAll('svg.vbText').remove();
@@ -2163,10 +2164,26 @@ export class SocketService {
         this.unmerge_All();
       });
   }
-
+  db_version: number = null;
   async createIndexed_db(data: any) {
     if (data.length > 0) {
-      this.commonSer.indexDB_Name = this.indexDB_Name;
+      if (this.indexDB_Name == 'candlechart1') {
+        const isExisting: any = (await window.indexedDB.databases()).map(
+          (db) => {
+            return db;
+          }
+        );
+        if (isExisting.length > 0) {
+          let str: string = isExisting.pop().name.slice(-1);
+          this.db_version = Number(str) + 1;
+          this.indexDB_Name = 'candlechart' + this.db_version;
+          this.commonSer.indexDB_Name = this.indexDB_Name;
+        } else {
+          this.commonSer.indexDB_Name = this.indexDB_Name;
+        }
+      } else {
+        this.commonSer.indexDB_Name = this.indexDB_Name;
+      }
       await this.commonSer.createIndexed_DB();
       await this.commonSer.storeData_to_Indexed_DB(data);
       this.renderLayout(data);
@@ -2196,15 +2213,13 @@ export class SocketService {
         this.perBarWidth = 192;
       }
     }
-    //still socket not connected
-    this.socketConnected = false;
+
     //get " DATE " from whole data
     const firstEle = new Date(chartData[0].date);
     // variables for calculating ibh and ibl for first 1 hour
     this.ibHTimer = 0;
     this.ibLTimer = 0;
     this.filterData = {};
-    this.simpleData = {};
     // variables for calculating ibh and ibl for after 5 hour
     this.ibHWTimer = this.db_wib_h;
     this.ibLWTimer = this.db_wib_l;
@@ -2266,11 +2281,20 @@ export class SocketService {
     }
     //zoom function
     this.main_zoom_event();
-    if (this.socketBool == true) {
+
+    this.filter_lastIndex = new Date(
+      Object.keys(this.filterData).slice(-1)[0]
+    ).valueOf();
+
+    if (this.socketBool == true && !this.start_socket_connection) {
       // calculate value area and vpoc for backend
       this.connectSocket(this.commonSer.vpoc_valueArea(chartData));
+    } else {
+      this.start_socket_connection = false;
+      this.stop_socket_connection = false;
     }
     $('#display_chart').css('display', 'block');
+    $('#candlestick-container').css('display', 'block');
     $('#chart-spinner').css('display', 'none');
     $('.ohlc-group').css('display', 'flex');
 
@@ -2715,7 +2739,7 @@ export class SocketService {
     }
 
     this.updateStartAndEndLine1(date);
-    sessionStorage.setItem('vpocObj', JSON.stringify(this.maintainVPOC()));
+    this.maintainVPOC();
     this.updateSide_vpoc_bar();
     if (this.selectTimeMinute == 1440) {
       d3.selectAll('path.vAvgLine').remove();
@@ -2738,6 +2762,7 @@ export class SocketService {
   }
 
   maintainVPOC() {
+    this.overAll_sideBar = null;
     let fullObj = {};
     Object.keys(this.filterData).forEach((d) => {
       Object.keys(this.filterData[d].sumLR).forEach((e) => {
@@ -2767,7 +2792,7 @@ export class SocketService {
     //   fullObj[a] > fullObj[b] ? a : b
     // );
     // var second_price = Object.keys(fullObj).sort(function(a:any,b:any){return fullObj[b]-fullObj[a]})[1];
-    return fullObj;
+    this.overAll_sideBar = fullObj;
   }
 
   weekly_IB_Text(date: any) {
@@ -4439,174 +4464,165 @@ export class SocketService {
   }
   //send instrument token to get ticks from kite
   tick_token: number = null;
+  stop_socket_connection: boolean = false;
+  start_socket_connection: boolean = false;
 
   async connectSocket(array: any) {
-    if (array.length > 1) {
-      let lastIndex: any = new Date(
-        Object.keys(this.filterData).slice(-1)[0]
-      ).valueOf();
-
-      if (this.selectTimeMinute == 1440) {
-        //remove all check box from chart when its whole day chart
-        d3.selectAll('foreignObject.checkBox').remove();
-        d3.selectAll('foreignObject.mergeBTN').remove();
-      }
-      if (this.socketConnected) {
-        await this.closeSocket(false);
-      }
-      await this.$appCom.connectSocket();
-      this.socketConnected = true;
-      // // //connecting to socket.io
-      let newFilData: any = [];
-      let statBool: any = false;
-
-      if (this.tick_token != null) {
-        array.push(this.tick_token);
-      }
-
-      this.$appCom.socket.emit(this.post_candle_token, array);
-      // data streaming
-      this.$appCom.socket.on(this.receive_candle_token, async (data: any) => {
-        this.updateSound_ltp(data);
-        this.updateIBTimer(data);
-        this.updatingDOMvalues(data);
-        data.date = new Date(data.date);
-        this.updateIBfamilyColors(data.date);
-        data._id = new Date().toString();
-
-        // store every data in indexed db
-        const request = indexedDB.open(this.indexDB_Name, 1);
-        request.onsuccess = (e: any) => {
-          const db = request.result;
-          const transaction = db.transaction('data', 'readwrite');
-          const storeObj = transaction.objectStore('data');
-          storeObj.put(data);
-        };
-        // date
-        var date: any = new Date(data.date);
-
-        if (this.selectTimeMinute == 5) {
-          date.setMinutes(5 * Math.floor(date.getMinutes() / 5));
-        } else if (this.selectTimeMinute == 15) {
-          date.setMinutes(15 * Math.floor(date.getMinutes() / 15));
-        } else if (this.selectTimeMinute == 30) {
-          let hour: number;
-          let minutes: number;
-          if (date.getTime() >= new Date(lastIndex + 1.8e6).getTime()) {
-            hour = date.getHours();
-            minutes = date.getMinutes();
-          } else {
-            if (date.getHours() != new Date(lastIndex).getHours()) {
-              hour = date.getHours() - 1;
-            } else {
-              hour = date.getHours();
-            }
-            minutes = new Date(lastIndex).getMinutes();
-          }
-          date.setHours(hour);
-          date.setMinutes(minutes);
-        } else if (this.selectTimeMinute == 60) {
-          let hour: number = null;
-          if (date.getMinutes() < this.minMinute) {
-            hour = date.getHours() - 1;
-          } else {
-            hour = date.getHours();
-          }
-          date.setHours(hour);
-          date.setMinutes(this.minMinute);
-        }
-        date.setSeconds(0);
-        date.setMilliseconds(0);
-
-        if (this.selectTimeMinute == 1440) {
-          date.setHours(0, 0, 0, 0);
-        }
-
-        //check date with merged dates
-        let dateCommitted = false;
-        if (Object.keys(this.mergedObj).length > 0) {
-          Object.keys(this.mergedObj).forEach((d: any) => {
-            if (date == d) {
-              dateCommitted = true;
-            }
-          });
-
-          if (!dateCommitted) {
-            Object.keys(this.mergedObj).forEach((d: any) => {
-              Object.values(this.mergedObj[d]).forEach((e: any) => {
-                if (date == e) {
-                  date = new Date(d);
-                }
-              });
-            });
-          }
-        }
-
-        if (Object.keys(this.filterData).indexOf(date.toString()) == -1) {
-          newFilData.push(data);
-
-          if (
-            this.selectTimeMinute < 30 &&
-            (Object.keys(this.filterData).length * this.selectTimeMinute) %
-              30 !=
-              0
-          ) {
-            if (newFilData.length > 3) {
-              this.timeRangeData.push(date);
-
-              this.addNewEleToFilterData(date, newFilData);
-              newFilData = [];
-              statBool = true;
-            }
-          } else {
-            if (newFilData.length > 3) {
-              this.modify_newChart();
-              newFilData = [];
-            }
-          }
-        } else {
-          if (statBool) {
-            d3.selectAll('g.barTexts1').remove();
-            this.updateStartAndEndLine();
-            this.updateScales();
-            await this.update_ImportantThings();
-            this.mainCommon(date, false);
-            this.main_zoom_event();
-            statBool = false;
-          } else {
-            this.calculationPart1(date.toString(), data);
-            this.filterData[date.toString()].data.push(data);
-            if (
-              data['ohlc'].low < this.min_ohlc ||
-              data['ohlc'].high > this.max_ohlc ||
-              data.latestTradedPrice < this.yScale.domain()[0] ||
-              data.latestTradedPrice > this.yScale.domain()[1]
-            ) {
-              this.emptyFinalObj = true;
-              //updating checkbox
-              this.updateStartAndEndLine();
-              this.updateScales();
-              this.appendCheckBox();
-              this.updateLabels();
-              this.mainCommon(date, false);
-              this.main_zoom_event();
-              this.max_ohlc = data['ohlc'].high;
-              this.min_ohlc = data['ohlc'].low;
-              this.emptyFinalObj = false;
-            } else {
-              this.mainCommon(date, true);
-            }
-          }
-        }
-      });
+    if (this.selectTimeMinute == 1440) {
+      //remove all check box from chart when its whole day chart
+      d3.selectAll('foreignObject.checkBox').remove();
+      d3.selectAll('foreignObject.mergeBTN').remove();
     }
+    await this.$appCom.connectSocket();
+    // // //connecting to socket.io
+    let newFilData: any = [];
+
+    if (this.tick_token != null) {
+      array.push(this.tick_token);
+    }
+
+    this.$appCom.socket.emit(this.post_candle_token, array);
+    // data streaming
+    this.socketConnected = true;
+    this.$appCom.socket.on(this.receive_candle_token, async (data: any) => {
+      data._id = new Date().toString();
+
+      // store every data in indexed db
+      const request = indexedDB.open(this.indexDB_Name, 1);
+      request.onsuccess = (e: any) => {
+        const db = request.result;
+        const transaction = db.transaction('data', 'readwrite');
+        const storeObj = transaction.objectStore('data');
+        storeObj.put(data);
+      };
+      if (!this.start_socket_connection) {
+        this.update_chart_live(data);
+      } else {
+        if (!this.stop_socket_connection) {
+          newFilData.push(data);
+          if (newFilData.length > 3) {
+            newFilData = [];
+            this.stop_socket_connection = true;
+            this.modify_newChart();
+          }
+        }
+      }
+    });
     setTimeout(() => {
       array = null;
     }, 5000);
   }
+
+  filter_lastIndex: any = null;
+  //update everything
+  async update_chart_live(data: any) {
+    this.updateSound_ltp(data);
+    this.updateIBTimer(data);
+    this.updatingDOMvalues(data);
+    data.date = new Date(data.date);
+    this.updateIBfamilyColors(data.date);
+
+    // date
+    let date: any = new Date(data.date);
+
+    if (this.selectTimeMinute == 5) {
+      date.setMinutes(5 * Math.floor(date.getMinutes() / 5));
+    } else if (this.selectTimeMinute == 15) {
+      date.setMinutes(15 * Math.floor(date.getMinutes() / 15));
+    } else if (this.selectTimeMinute == 30) {
+      let hour: number;
+      let minutes: number;
+      if (date.getTime() >= new Date(this.filter_lastIndex + 1.8e6).getTime()) {
+        hour = date.getHours();
+        minutes = date.getMinutes();
+      } else {
+        if (date.getHours() != new Date(this.filter_lastIndex).getHours()) {
+          hour = date.getHours() - 1;
+        } else {
+          hour = date.getHours();
+        }
+        minutes = new Date(this.filter_lastIndex).getMinutes();
+      }
+      date.setHours(hour);
+      date.setMinutes(minutes);
+    } else if (this.selectTimeMinute == 60) {
+      let hour: number = null;
+      if (date.getMinutes() < this.minMinute) {
+        hour = date.getHours() - 1;
+      } else {
+        hour = date.getHours();
+      }
+      date.setHours(hour);
+      date.setMinutes(this.minMinute);
+    }
+
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    if (this.selectTimeMinute == 1440) {
+      date.setHours(0, 0, 0, 0);
+    }
+
+    //check date with merged dates
+    let dateCommitted = false;
+    if (Object.keys(this.mergedObj).length > 0) {
+      Object.keys(this.mergedObj).forEach((d: any) => {
+        if (date == d) {
+          dateCommitted = true;
+        }
+      });
+
+      if (!dateCommitted) {
+        Object.keys(this.mergedObj).forEach((d: any) => {
+          Object.values(this.mergedObj[d]).forEach((e: any) => {
+            if (date == e) {
+              date = new Date(d);
+            }
+          });
+        });
+      }
+    }
+
+    if (Object.keys(this.filterData).indexOf(date.toString()) == -1) {
+      this.start_socket_connection = true;
+    } else {
+      // if (statBool) {
+      //   d3.selectAll('g.barTexts1').remove();
+      //   this.updateStartAndEndLine();
+      //   this.updateScales();
+      //   await this.update_ImportantThings();
+      //   this.mainCommon(date, false);
+      //   this.main_zoom_event();
+      //   statBool = false;
+      // } else {
+      this.calculationPart1(date.toString(), data);
+      this.filterData[date.toString()].data.push(data);
+      if (
+        data['ohlc'].low < this.min_ohlc ||
+        data['ohlc'].high > this.max_ohlc ||
+        data.latestTradedPrice < this.yScale.domain()[0] ||
+        data.latestTradedPrice > this.yScale.domain()[1]
+      ) {
+        this.emptyFinalObj = true;
+        //updating checkbox
+        this.updateStartAndEndLine();
+        this.updateScales();
+        this.appendCheckBox();
+        this.updateLabels();
+        this.mainCommon(date, false);
+        this.main_zoom_event();
+        this.max_ohlc = data['ohlc'].high;
+        this.min_ohlc = data['ohlc'].low;
+        this.emptyFinalObj = false;
+      } else {
+        this.mainCommon(date, true);
+      }
+    }
+    // }
+  }
   async update_ImportantThings() {
     this.updateleftSideandRightSideTextData(false);
-    sessionStorage.setItem('vpocObj', JSON.stringify(this.maintainVPOC()));
+    this.maintainVPOC();
     this.updateRedAndPurpleLine();
     this.updateCandle();
     this.updateSide_vpoc_bar();
@@ -4618,7 +4634,7 @@ export class SocketService {
     this.bottomBar();
     return '';
   }
-  addNewEleToFilterData(element: any, array: any) {
+  /* addNewEleToFilterData(element: any, array: any) {
     array[1].val = (array[1].total_volume - array[0].total_volume) / 50;
     const obj = array[1];
     const subObj: any = {};
@@ -4650,19 +4666,16 @@ export class SocketService {
     subObj.leftSideData.push(array[1]);
     this.filterData[element] = subObj;
     this.vahvalValue = {};
-  }
+  } */
   async getDataFrom_Indexed_DB() {
     this.modify_newChart();
   }
   async modify_newChart() {
-    await this.closeSocket(false);
     d3.selectAll('svg.baseSVG').remove();
     this.renderSVG();
     document.getElementById('candlestick-container').style.display = 'none';
     document.getElementById('chart-spinner').style.display = 'block';
     this.renderLayout(await this.commonSer.getDataFrom_Indexed_DB());
-    $('#candlestick-container').css('display', 'block');
-    $('#chart-spinner').css('display', 'none');
   }
 
   async clear_indexed_DB() {

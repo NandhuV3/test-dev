@@ -24,10 +24,7 @@ router.post("/chart-data", (req, res, next) => {
       },
     })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 
@@ -40,22 +37,17 @@ router.post("/weeklyIB_Timer", (req, res, next) => {
     .sort({ date: -1 })
     .limit(1)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
+
 // fetch data for profile chart
 router.post("/NSE-DAY-PROFILE", (req, res, next) => {
   db.get()
     .collection("PROFILE-CHART")
     .find()
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //fetch every value area
@@ -64,10 +56,7 @@ router.post("/GET-WHOLE-VA", (req, res, next) => {
     .collection("DAY-VALUE_AREA")
     .find()
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //fetch last_14-Day datas
@@ -79,10 +68,7 @@ router.post("/last_14-Days_first_15Min", (req, res, next) => {
     .sort({ date: -1 })
     .limit(14)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 router.post("/last_14-Days_totalVolume", (req, res, next) => {
@@ -93,10 +79,7 @@ router.post("/last_14-Days_totalVolume", (req, res, next) => {
     .sort({ date: -1 })
     .limit(14)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 // store reference labels
@@ -180,10 +163,7 @@ router.post("/BigRange", async (req, res, next) => {
     .collection("Big-Range")
     .find({ volume: 0 })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //get last data to find range
@@ -201,10 +181,7 @@ router.post("/get_single_data", async (req, res, next) => {
     .sort({ date: -1 })
     .limit(1)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //get data for linechart page from kite api
@@ -223,6 +200,7 @@ router.post("/highOne", async (req, res, next) => {
       }
     })
     .catch(function (err) {
+      add_error_msg_to_logger("highOne", err);
       res.json({ message: err.message });
     });
 });
@@ -242,6 +220,7 @@ router.post("/highTwo", async (req, res, next) => {
       }
     })
     .catch(function (err) {
+      add_error_msg_to_logger("highTwo", err);
       res.json({ message: err.message });
     });
 });
@@ -252,6 +231,7 @@ router.post("/getInstrument", async (req, res) => {
       res.json(data);
     })
     .catch(function (err) {
+      add_error_msg_to_logger("getInstrument", err);
       res.json({ message: err.message });
     });
 });
@@ -262,6 +242,7 @@ router.post("/instrument-list", async (req, res) => {
       res.json(data);
     })
     .catch(function (err) {
+      add_error_msg_to_logger("instrument-list", err);
       res.json({ message: err.message });
     });
 });
@@ -280,10 +261,7 @@ router.post("/getSpecifiedToken", async (req, res) => {
       },
     })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //get LAST ticks from db
@@ -299,10 +277,7 @@ router.post("/last-tick", async (req, res) => {
     .sort({ date: -1 })
     .limit(1)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 
@@ -329,10 +304,7 @@ router.post("/ltp", async (req, res, next) => {
       },
     })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //get the last day last order from db
@@ -350,12 +322,7 @@ router.post("/getOldOrders", async (req, res, next) => {
       },
     })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.sendStatus(404).json({ message: "sorry! No Date in this Date" });
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //fetch real and unrealised data from db
@@ -364,8 +331,7 @@ router.post("/realUnreal", (req, res) => {
     .collection("Total_R-UR")
     .find({ date: { $gte: new Date("2022-04-01") } })
     .toArray((err, result) => {
-      if (err) throw err;
-      res.json(result);
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //fetch real and unrealised data from db
@@ -375,8 +341,7 @@ router.post("/realUnrealFrom", (req, res) => {
     .collection("Total_R-UR")
     .find({ date: { $gte: new Date(req.body.date) } })
     .toArray((err, result) => {
-      if (err) throw err;
-      res.json(result);
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //get last ltp from database
@@ -387,12 +352,7 @@ router.post("/lastLTP", async (req, res, next) => {
     .sort({ date: -1 })
     .limit(1)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.sendStatus(404).json({ message: "sorry! No Date in this Date" });
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //fetch every pending orders from db
@@ -403,16 +363,11 @@ router.post("/pending", (req, res) => {
     .sort({ date: -1 })
     .limit(1)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.sendStatus(404).json({ message: "sorry! No Date in this Date" });
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //fetch previousOrders from db
-router.post("/previousOrders", (req, res) => {
+router.post("/pending", (req, res) => {
   db.get()
     .collection("Pending-Orders")
     .find()
@@ -420,12 +375,7 @@ router.post("/previousOrders", (req, res) => {
     .skip(1)
     .limit(1)
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.sendStatus(404).json({ message: "sorry! No Date in this Date" });
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
 //doubt
@@ -442,15 +392,9 @@ router.post("/pending", (req, res) => {
       },
     })
     .toArray((err, result) => {
-      if (err) throw err;
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.sendStatus(404).json({ message: "sorry! No Date in this Date" });
-      }
+      send_it_to_browser(err, result, req.url, res);
     });
 });
-
 
 // generate accesstoken from kite API
 router.post("/requestToken", async (req, res) => {
@@ -460,7 +404,7 @@ router.post("/requestToken", async (req, res) => {
   });
   var api_secret = API_SECRET;
   var request_token = req.body.request_token;
-  // var ipAddress = req.body.ipAddress;
+
   kc.generateSession(request_token, api_secret)
     .then(function (response) {
       runAllFunction.KC.access_token = response.access_token;
@@ -482,6 +426,7 @@ router.post("/requestToken", async (req, res) => {
       res.json({ message: true });
     })
     .catch((err) => {
+      add_error_msg_to_logger("requestToken api", err);
       res.json({ message: err.message });
     });
 });
@@ -492,6 +437,7 @@ router.post("/deleteToken", async (req, res) => {
       res.send("success");
     })
     .catch((err) => {
+      add_error_msg_to_logger("deleteToken api", err);
       res.json({ message: err.message });
     });
 });
@@ -513,5 +459,37 @@ router.post("/getlogs", async (req, res) => {
   });
 });
 
+function send_it_to_browser(err, result, message, res) {
+  if (err) {
+    // ! if error store it in logs
+    fs.appendFileSync(
+      "router/logs.txt",
+      JSON.stringify({
+        err: err.message,
+        message,
+        time: new Date(),
+      })
+    );
+    res.status(200).json({ err: err.message });
+  } else {
+    res.status(200).json(result);
+  }
+}
 
+// todo : error function
+function add_error_msg_to_logger(message, err) {
+  fs.appendFileSync(
+    "router/logs.txt",
+    JSON.stringify({
+      err: err.message,
+      message,
+      time: new Date(),
+    })
+  );
+  db.get().collection('ERROR-MSG').insertOne({
+    err : err.message,
+    message,
+    time: new Date()
+  })
+}
 module.exports = router;

@@ -19,28 +19,23 @@ let token_reviews = 0;
 
 const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile");
 
-//////   -------------------  cron works starts ---------------
+// //todo   -------------------  cron works starts ---------------
 // cron.schedule("40 3 * * MON-FRI", () => {
 //   setAccesstoken_to_kite();
 // });
 
-// // TODO : start the cron and connect kite
+// //TODO : start the cron and connect kite
 
 // cron.schedule("42 3 * * MON-FRI", () => {
-//   total_review = 0;
-//   storeCandleTicksIn_DB();
-// });
-// cron.schedule("43 3 * * MON-FRI", () => {
 //   token_reviews = 0;
 //   get_Instrument_ticks();
 // });
-
-// // TODO : Stop the cron and disconnect kite connection
-// cron.schedule("0 10 * * MON-FRI", () => {
-//   stopCron();
+// cron.schedule("43 3 * * MON-FRI", () => {
+//   total_review = 0;
+//   candlestick_ticks();
 // });
 
-// // TODO : store the first minutes data in db
+// //TODO : store the first minutes data in db
 // cron.schedule("1 4 * * MON-FRI", () => {
 //   let date = moment(new Date()).format("YYYY-MM-DD");
 //   db.get()
@@ -59,7 +54,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //     });
 // });
 
-// // TODO updating weelky ib
+// //TODO updating weelky ib
 // cron.schedule("0 10 * * FRI", () => {
 //   db.get()
 //     .collection("IB-TICKS")
@@ -70,8 +65,8 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //       db.get().collection("WEEKLY-IB").insertOne(resp[0]);
 //     });
 // });
-// // TODO : updating daily profile
-// cron.schedule("1 10 * * MON-FRI", () => {
+// //TODO : updating daily profile
+// cron.schedule("0 10 * * MON-FRI", () => {
 //   db.get()
 //     .collection("IB-TICKS")
 //     .find()
@@ -81,18 +76,129 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //       db.get().collection("PROFILE-CHART").insertOne(resp[0]);
 //     });
 // });
+// //todo : updating previous day vpoc and valueArea to the reference page at the time 3 : 30
+// cron.schedule("1 10 * * MON-FRI", () => {
+//   let currentDateObj = new Date();
+//   currentDateObj.setDate(
+//     currentDateObj.getDate() - ((currentDateObj.getDay() + 2) % 7)
+//   );
+//   currentDateObj = moment(currentDateObj).format("YYYY-MM-DD");
+//   db.get()
+//     .collection("PROFILE-CHART")
+//     .find({ date: { $gte: new Date(currentDateObj) } })
+//     .toArray((err, result) => {
+//       //! first delete the old labels from database
 
-// //  TODO first find the ibTimer for ibh and ibl ....after that
+//       let deleteName = [
+//         "prevVPOC",
+//         "prevVAH",
+//         "prevVAL",
+//         "cur_week_VAH",
+//         "cur_week_VAL",
+//         "cur_week_VPOC",
+//       ];
+//       deleteName.forEach((d) => {
+//         db.get().collection("User-Labels").deleteOne({
+//           label: d,
+//         });
+//       });
+//       if (result.length > 0) {
+//         //? store every on in this array
+//         let storeOBJ_arr = [];
 
-// //  * find FA High and Low.....
+//         //todo : week reference labels of vpoc and va
+//         let cur_week_VPOC = 0;
+//         let cur_week_VAH = 0;
+//         let cur_week_VAL = 0;
+//         result.forEach((d) => {
+//           cur_week_VPOC += Number(d["volumePOC"].price);
+//           cur_week_VAH += Number(d["valueArea"].vah);
+//           cur_week_VAL += Number(d["valueArea"].val);
+//         });
 
-// //   ? 1. check the ibh Timer is > 0 and < 1800...... if its 'true' then add OHLC high as" FA_High " to the reference page (else) nothing
+//         cur_week_VPOC /= result.length;
+//         cur_week_VAH /= result.length;
+//         cur_week_VAL /= result.length;
 
-// //   ? 2. check ibl timer is > 0 and < 1800........  if its 'true' then add OHLC Low as " FA_Low " to the reference page (else) nothing
+//         storeOBJ_arr.push(
+//           made_label(
+//             "cur_week_VPOC",
+//             cur_week_VPOC,
+//             "#6beb34",
+//             new Date(),
+//             "currentWeek"
+//           )
+//         );
+//         storeOBJ_arr.push(
+//           made_label(
+//             "cur_week_VAH",
+//             cur_week_VAH,
+//             "#6beb34",
+//             new Date(),
+//             "currentWeek"
+//           )
+//         );
+//         storeOBJ_arr.push(
+//           made_label(
+//             "cur_week_VAL",
+//             cur_week_VAL,
+//             "#6beb34",
+//             new Date(),
+//             "currentWeek"
+//           )
+//         );
+//         //todo : day reference labels of vpoc and va
+//         //* push the every single data to the array
+//         let lastElem = result.slice(-1)[0];
 
-// // // updating weekly IB timer
+//         storeOBJ_arr.push(
+//           made_label(
+//             "prevVPOC",
+//             lastElem["volumePOC"].price,
+//             "red",
+//             new Date(lastElem.date),
+//             "currentWeek"
+//           )
+//         );
+//         storeOBJ_arr.push(
+//           made_label(
+//             "prevVAH",
+//             lastElem["valueArea"].vah,
+//             "red",
+//             new Date(lastElem.date),
+//             "currentWeek"
+//           )
+//         );
+//         storeOBJ_arr.push(
+//           made_label(
+//             "prevVAL",
+//             lastElem["valueArea"].val,
+//             "red",
+//             new Date(lastElem.date),
+//             "currentWeek"
+//           )
+//         );
+
+//         //todo : insert the array to database
+//         db.get().collection("User-Labels").insertMany(storeOBJ_arr);
+//         setTimeout(() => {
+//           storeOBJ_arr = null;
+//         }, 5000);
+//       }
+//     });
+// });
+
+// //TODO first find the ibTimer for ibh and ibl ....after that
+
+// //* find FA High and Low.....
+
+// //? 1. check the ibh Timer is > 0 and < 1800...... if its 'true' then add OHLC high as" FA_High " to the reference page (else) nothing
+
+// //? 2. check ibl timer is > 0 and < 1800........  if its 'true' then add OHLC Low as " FA_Low " to the reference page (else) nothing
+
+// //todo updating weekly IB timer
 // cron.schedule("2 10 * * MON-FRI", () => {
-//   //   ! delete the old FA and ATR labels from database....
+//   //! delete the old FA and ATR labels from database....
 
 //   let delete_Arr = [
 //     "FA_High",
@@ -105,7 +211,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //   delete_Arr.forEach((label) => {
 //     db.get().collection("User-Labels").deleteOne({ label });
 //   });
-//   // TODO : Get current Day data from db;
+//   //TODO : Get current Day data from db;
 //   let date = moment(new Date()).format("YYYY-MM-DD");
 //   db.get()
 //     .collection("IB-TICKS")
@@ -113,7 +219,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //       date: { $gte: new Date(date) },
 //     })
 //     .toArray((err, resp) => {
-//       //   * find Average True Range with last 14 days data
+//       //* find Average True Range with last 14 days data
 //       db.get()
 //         .collection("PROFILE-CHART")
 //         .find()
@@ -121,17 +227,17 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //         .skip(1)
 //         .limit(14)
 //         .toArray((err, last_14_days) => {
-//           // * calculate AVG True Range with last 14 Days
+//           //* calculate AVG True Range with last 14 Days
 //           let range = 0;
 //           let ATR = 0;
 //           if (last_14_days.length > 0) {
 //             last_14_days.forEach((data) => {
 //               range += data["ohlc"].high - data["ohlc"].low;
 //             });
-//             // TODO : Average True Range
+//             //TODO : Average True Range
 //             ATR = range / last_14_days.length;
 //           }
-//           // // TODO : Calculate weekly ib timer
+//           //TODO : Calculate weekly ib timer
 //           let customDate = 0;
 //           let customNumber = 0;
 //           let ibHTimer = 0;
@@ -153,7 +259,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //           // ibAfterFirst5hr.setMinutes(15);
 //           ibAfterFirst5hr.setSeconds(0);
 //           ibAfterFirst5hr.setMilliseconds(0);
-//           // TODO : Get last day time from db
+//           //TODO : Get last day time from db
 //           db.get()
 //             .collection("WEEKLY-IB-TIMER")
 //             .find({})
@@ -184,28 +290,27 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                       new Date(customDate).getTime()) /
 //                       1000
 //                   );
-//                   //
-//                   //find ib after one hour
+//                   //todo find ib after one hour
 //                   if (new Date(d.date).getTime() > ibStartTime.getTime()) {
-//                     //ibh time calculation
+//                     //todo ibh time calculation
 //                     if (d["initialBalance"].ibHigh < d.latestTradedPrice) {
 //                       ibHTimer += timeCal;
 //                     }
-//                     //ibh time calculation
+//                     //todo ibh time calculation
 //                     if (d["initialBalance"].ibLow > d.latestTradedPrice) {
 //                       ibLTimer += timeCal;
 //                     }
 //                   }
-//                   //find ib after five hour
+//                   //todo find ib after five hour
 //                   if (new Date(d.date).getDay() === 5) {
 //                     if (
 //                       new Date(d.date).getTime() > ibAfterFirst5hr.getTime()
 //                     ) {
-//                       //ibh time calculation
+//                       //todo ibh time calculation
 //                       if (d["weeklyIB"].ibHigh < d.latestTradedPrice) {
 //                         ibHWTimer += timeCal;
 //                       }
-//                       //ibh time calculation
+//                       //todo ibh time calculation
 //                       if (d["weeklyIB"].ibLow > d.latestTradedPrice) {
 //                         ibLWTimer += timeCal;
 //                       }
@@ -214,7 +319,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                     if (d["weeklyIB"].ibHigh < d.latestTradedPrice) {
 //                       ibHWTimer += timeCal;
 //                     }
-//                     //ibh time calculation
+//                     //todo ibh time calculation
 //                     if (d["weeklyIB"].ibLow > d.latestTradedPrice) {
 //                       ibLWTimer += timeCal;
 //                     }
@@ -223,13 +328,13 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                 customNumber = new Date(d.date).getSeconds();
 //                 customDate = new Date(d.date);
 //               });
-//               // * Modified weekly IB Timer inserting in db
+//               //* Modified weekly IB Timer inserting in db
 //               db.get().collection("WEEKLY-IB-TIMER").insertOne({
 //                 date: originalDate,
 //                 weeklyIB_high: ibHWTimer,
 //                 weeklyIB_low: ibLWTimer,
 //               });
-//               // TODO : Calculate FA > High and low
+//               //TODO : Calculate FA > High and low
 //               let current_FA = resp.slice(-1)[0];
 
 //               let FA_High = null;
@@ -239,7 +344,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //               let ATR1_Up = null;
 //               let ATR2_Up = null;
 //               if (ibHTimer < 1800 && ibHTimer > 0) {
-//                 // TODO  FA_High
+//                 //TODO  FA_High
 //                 FA_High = {
 //                   label: "FA_High",
 //                   date,
@@ -248,8 +353,9 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                   AlertStatus: "onslider",
 //                   SMS_status: "off",
 //                   timestamp: new Date(),
+//                   info: "currentWeek",
 //                 };
-//                 // TODO  1ATR_DOWN
+//                 //TODO  1ATR_DOWN
 //                 ATR1_Down = {
 //                   label: "1ATR_DOWN",
 //                   date,
@@ -258,8 +364,9 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                   AlertStatus: "onslider",
 //                   SMS_status: "off",
 //                   timestamp: new Date(),
+//                   info: "currentWeek",
 //                 };
-//                 // TODO  2ATR_DOWN
+//                 //TODO  2ATR_DOWN
 //                 ATR2_Down = {
 //                   label: "2ATR_DOWN",
 //                   date,
@@ -268,9 +375,10 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                   AlertStatus: "onslider",
 //                   SMS_status: "off",
 //                   timestamp: new Date(),
+//                   info: "currentWeek",
 //                 };
 //               }
-//               // TODO  FA_Low
+//               //TODO  FA_Low
 //               if (ibLTimer < 1800 && ibLTimer > 0) {
 //                 FA_Low = {
 //                   label: "FA_Low",
@@ -280,8 +388,9 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                   AlertStatus: "onslider",
 //                   SMS_status: "off",
 //                   timestamp: new Date(),
+//                   info: "currentWeek",
 //                 };
-//                 // TODO  1ATR_UP
+//                 //TODO  1ATR_UP
 //                 ATR1_Up = {
 //                   label: "1ATR_UP",
 //                   date,
@@ -290,8 +399,9 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                   AlertStatus: "onslider",
 //                   SMS_status: "off",
 //                   timestamp: new Date(),
+//                   info: "currentWeek",
 //                 };
-//                 // TODO  2ATR_UP
+//                 //TODO  2ATR_UP
 //                 ATR2_Up = {
 //                   label: "2ATR_UP",
 //                   date,
@@ -300,12 +410,13 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //                   AlertStatus: "onslider",
 //                   SMS_status: "off",
 //                   timestamp: new Date(),
+//                   info: "currentWeek",
 //                 };
 //               }
 
-//               //   TODO : after deleting the labels now insert these datas in databse
+//               //TODO : after deleting the labels now insert these datas in databse
 
-//               // ! if FA High and Low != null , update it in DB
+//               //! if FA High and Low != null , update it in DB
 //               if (FA_High != null) {
 //                 let ATR_arr_high = [ATR1_Down, ATR2_Down, FA_High];
 //                 db.get().collection("User-Labels").insertMany(ATR_arr_high);
@@ -318,6 +429,7 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //         });
 //     });
 // });
+// //todo : update day value area for profile graph
 // cron.schedule("3 10 * * MON-FRI", () => {
 //   db.get()
 //     .collection("IB-TICKS")
@@ -403,110 +515,23 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //     });
 // });
 
-// // // todo : updating previous day vpoc and valueArea to the reference page at the time 3 : 30
-// cron.schedule("4 10 * * MON-FRI", () => {
-//   let currentDateObj = new Date();
-//   currentDateObj.setDate(
-//     currentDateObj.getDate() - ((currentDateObj.getDay() + 2) % 7)
-//   );
-//   currentDateObj = moment(currentDateObj).format("YYYY-MM-DD");
-//   db.get()
-//     .collection("PROFILE-CHART")
-//     .find({ date: { $gte: new Date(currentDateObj) } })
-//     .toArray((err, result) => {
-//       // ! first delete the old labels from database
-
-//       let deleteName = [
-//         "prevVPOC",
-//         "prevVAH",
-//         "prevVAL",
-//         "cur_week_VAH",
-//         "cur_week_VAL",
-//         "cur_week_VPOC",
-//       ];
-//       deleteName.forEach((d) => {
-//         db.get().collection("User-Labels").deleteOne({
-//           label: d,
-//         });
-//       });
-//       if (result.length > 0) {
-//         // ? store every on in this array
-//         let storeOBJ_arr = [];
-
-//         // todo : week reference labels of vpoc and va
-//         let cur_week_VPOC = 0;
-//         let cur_week_VAH = 0;
-//         let cur_week_VAL = 0;
-//         result.forEach((d) => {
-//           cur_week_VPOC += Number(d["volumePOC"].price);
-//           cur_week_VAH += Number(d["valueArea"].vah);
-//           cur_week_VAL += Number(d["valueArea"].val);
-//         });
-
-//         cur_week_VPOC /= result.length;
-//         cur_week_VAH /= result.length;
-//         cur_week_VAL /= result.length;
-
-//         storeOBJ_arr.push(
-//           made_label("cur_week_VPOC", cur_week_VPOC, "#6beb34", new Date())
-//         );
-//         storeOBJ_arr.push(
-//           made_label("cur_week_VAH", cur_week_VAH, "#6beb34", new Date())
-//         );
-//         storeOBJ_arr.push(
-//           made_label("cur_week_VAL", cur_week_VAL, "#6beb34", new Date())
-//         );
-//         // todo : day reference labels of vpoc and va
-//         // * push the every single data to the array
-//         let lastElem = result.slice(-1)[0];
-
-//         storeOBJ_arr.push(
-//           made_label(
-//             "prevVPOC",
-//             lastElem["volumePOC"].price,
-//             "red",
-//             new Date(lastElem.date)
-//           )
-//         );
-//         storeOBJ_arr.push(
-//           made_label(
-//             "prevVAH",
-//             lastElem["valueArea"].vah,
-//             "red",
-//             new Date(lastElem.date)
-//           )
-//         );
-//         storeOBJ_arr.push(
-//           made_label(
-//             "prevVAL",
-//             lastElem["valueArea"].val,
-//             "red",
-//             new Date(lastElem.date)
-//           )
-//         );
-
-//         // todo : insert the array to database
-//         db.get().collection("User-Labels").insertMany(storeOBJ_arr);
-//         setTimeout(() => {
-//           storeOBJ_arr = null;
-//         }, 5000);
-//       }
-//     });
-// });
-
-// cron.schedule("5 10 * * THU",() => {
-
+// // //todo : update 'prev week' vpoc and va
+// cron.schedule("4 10 * * THU", () => {
 //   let deleteName = ["prev_week_vpoc", "prev_week_vah", "prev_week_val"];
-//       deleteName.forEach((d) => {
-//         db.get().collection("User-Labels").deleteOne({
-//           label: d,
-//         });
-//       });
+//   deleteName.forEach((d) => {
+//     db.get().collection("User-Labels").deleteOne({
+//       label: d,
+//     });
+//   });
+//   let date = moment(new Date(new Date() - 6 * 60 * 60 * 24 * 1000)).format(
+//     "YYYY-MM-DD"
+//   );
+
 //   db.get()
 //     .collection("PROFILE-CHART")
 //     .find({
 //       date: {
-//         $gte: new Date(new Date() - 6 * 60 * 60 * 24 * 1000),
+//         $gte: new Date(date),
 //       },
 //     })
 //     .toArray((err, res) => {
@@ -529,7 +554,8 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //           "prev_week_vpoc",
 //           prev_week_vpoc,
 //           "#d69256",
-//           new Date()
+//           new Date(),
+//           "prevWeek"
 //         )
 //       );
 //       PREV_Arr.push(
@@ -537,7 +563,8 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //           "prev_week_vah",
 //           prev_week_vah,
 //           "#d69256",
-//           new Date()
+//           new Date(),
+//           "prevWeek"
 //         )
 //       );
 //       PREV_Arr.push(
@@ -545,16 +572,16 @@ const RunningSingleDayProfile = require("../wsConnection/RunningSingleDayProfile
 //           "prev_week_val",
 //           prev_week_val,
 //           "#d69256",
-//           new Date()
+//           new Date(),
+//           "prevWeek"
 //         )
 //       );
-
 //       db.get().collection("User-Labels").insertMany(PREV_Arr);
 //       PREV_Arr = null;
 //     });
 // });
 
-function made_label(label, price, color, date) {
+function made_label(label, price, color, date, info) {
   return {
     label,
     date: moment(date).format("YYYY-MM-DD"),
@@ -563,36 +590,30 @@ function made_label(label, price, color, date) {
     AlertStatus: "onslider",
     SMS_status: "off",
     timestamp: new Date(),
+    info,
   };
 }
 ///////////   ------------------   cron works end ----------------
 
 Router.get("/Zip/:date", (req, res) => {
-  fs.readFile(
-    `backend/cronJob/zipFolder/${req.params.date}.zip`,
-    function (err, data) {
-      if (!err) {
-        var zip = new JSZip();
-        zip.loadAsync(data).then(function (contents) {
-          Object.keys(contents.files).forEach(function (filename) {
-            zip
-              .file(filename)
-              // .async("nodebuffer")
-              .async("string")
-              .then(function (content) {
-                res.send(content);
-              });
-          });
+  fs.readFile(`cronJob/zipFolder/${req.params.date}.zip`, function (err, data) {
+    if (!err) {
+      var zip = new JSZip();
+      zip.loadAsync(data).then(function (contents) {
+        Object.keys(contents.files).forEach(function (filename) {
+          zip
+            .file(filename)
+            // .async("nodebuffer")
+            .async("string")
+            .then(function (content) {
+              res.send(content);
+            });
         });
-      }
+      });
     }
-  );
-});
-Router.get("/Zip1", (req, res) => {
-  fs.readFile(`backend/router/logs.txt`, "utf8", function (err, data) {
-    res.send(data);
   });
 });
+
 Router.get("/openZip/:date", (req, res) => {
   fs.readFile(`cronJob/zipFolder/${req.params.date}.zip`, function (err, data) {
     if (!err) {
@@ -611,11 +632,7 @@ Router.get("/openZip/:date", (req, res) => {
     }
   });
 });
-Router.get("/openZip1", (req, res) => {
-  fs.readFile(`router/logs.txt`, "utf8", function (err, data) {
-    res.send(data);
-  });
-});
+
 function setAccesstoken_to_kite() {
   db.get()
     .collection("Admin-Token")
@@ -626,97 +643,84 @@ function setAccesstoken_to_kite() {
       runAllFunction = new kiteInstrumemt();
       runAllFunction.KC.access_token = access_token;
       runAllFunction.KC.setAccessToken(access_token);
-      get_Instrument_ticks();
     });
 }
-//we used this func more then once
 
-// todo : main function to store ticks..
-function storeCandleTicksIn_DB() {
-  ticker = new KiteTicker({
-    api_key,
-    access_token,
-  });
+function candlestick_ticks() {
+  let socket_err = false;
+  let RSDP = null;
+  let volume_traded = 0;
+  let cDate = moment(new Date()).format("YYYY-MM-DD");
   db.get()
     .collection("IB-TICKS")
-    .find({ date: { $gte: new Date(moment(new Date()).format("YYYY-MM-DD")) } })
-    .toArray(async (err, data) => {
-      if (data.length > 1) {
-        let array = await vpoc_valueArea(data);
-        runCron(data.slice(-1)[0].total_volume, array);
+    .find({ date: { $gte: new Date(cDate) } })
+    .toArray(async (err, resp) => {
+      if (resp.length > 0) {
+        let array = await vpoc_valueArea(resp);
+        RSDP = new RunningSingleDayProfile(array, true);
+        volume_traded = resp.slice(-1)[0].total_volume;
+        RSDP.first15MinProfile = resp.slice(-1)[0].first15MinProfile;
+        RSDP.initialBalance = resp.slice(-1)[0].initialBalance;
+        array = null;
       } else {
-        runCron(0, []);
+        RSDP = new RunningSingleDayProfile([], true);
       }
+
+      let candle_ticker = new KiteTicker({
+        api_key,
+        access_token,
+      });
+      // set autoreconnect with 10 maximum reconnections and 5 second interval
+
+      candle_ticker.autoReconnect(true, -1, 5);
+      candle_ticker.connect();
+      candle_ticker.on("ticks", onTicks);
+      candle_ticker.on("connect", subscribe);
+
+      candle_ticker.on("error", (e) => {
+        add_error_msg_to_logger("candlestick socket", e.message);
+        // ...
+        socket_err = true;
+        total_review++;
+        candle_ticker.autoReconnect(false);
+        if (total_review < 5) {
+          candlestick_ticks();
+        }
+      });
+      candle_ticker.on("disconnect", () => {
+        // ...
+        if (!socket_err) {
+          candle_ticker.autoReconnect(false);
+        }
+      });
+
+      candle_ticker.on("close", () => {
+        // ...
+      });
+
+      function onTicks(ticks) {
+        if (ticks[0].volume_traded > volume_traded) {
+          ticks[0].last_traded_quantity =
+            ticks[0].volume_traded - volume_traded;
+          db.get()
+            .collection("IB-TICKS")
+            .insertOne(RSDP.singleDayProfile(ticks[0]));
+          volume_traded = ticks[0].volume_traded;
+        }
+      }
+      async function subscribe() {
+        let instrument_Token = [Number(await runAllFunction.findInstrument())];
+        candle_ticker.subscribe(instrument_Token);
+        candle_ticker.setMode(candle_ticker.modeFull, instrument_Token);
+      }
+      cron.schedule("0 10 * * MON-FRI", () => {
+        candle_ticker.disconnect();
+      });
+      resp = null;
     });
 }
 
-async function runCron(t_vol, array) {
-  let volume_traded = t_vol;
-  let RSDP = new RunningSingleDayProfile(array, true);
-
-  ticker.autoReconnect(true, -1, 5);
-  ticker.connect();
-  ticker.on("ticks", onTicks);
-  ticker.on("connect", subscribe);
-
-  //kite error
-  ticker.on("error", (e) => {
-    total_review++;
-    ticker.autoReconnect(false);
-    fs.appendFileSync("router/logs.txt", JSON.stringify({err :e.message, time : new Date()}));
-    if (total_review < 5) {
-      storeCandleTicksIn_DB();
-    }
-  });
-
-  //  disconnect kite
-  ticker.on("disconnect", (cb) => {
-    //...
-    if (ticker != null) {
-      ticker.autoReconnect(false);
-    }
-    fs.appendFileSync("router/logs.txt", JSON.stringify({err :"diconnected", time : new Date()}));
-  });
-
-  async function onTicks(ticks) {
-    let tick = ticks[0];
-    if (tick.volume_traded > volume_traded) {
-      tick.last_traded_quantity = tick.volume_traded - volume_traded;
-      db.get().collection("IB-TICKS").insertOne(RSDP.singleDayProfile(tick));
-      volume_traded = tick.volume_traded;
-    }
-  }
-  async function subscribe() {
-    let token = Number(await runAllFunction.findInstrument());
-    let instrument_Token = [token];
-    ticker.subscribe(instrument_Token);
-    ticker.setMode(ticker.modeFull, instrument_Token);
-  }
-}
-
-function stopCron() {
-  ticker.disconnect();
-}
-
-Router.post("/stopCron", (req, res) => {
-  stopCron();
-  res.json({ message: "stopped!!" });
-});
-
-Router.post("/runCron", (req, res) => {
-  storeCandleTicksIn_DB();
-  res.json({ message: "started!!" });
-});
-
-Router.post("/cronTime", (req, res) => {
-  let hr = Number(req.body.hour);
-  let min = Number(req.body.minute);
-  let setCron = cron.schedule(`${min} ${hr} * * MON-FRI`, async function () {
-    storeCandleTicksIn_DB();
-    setCron.stop();
-  });
-  res.json({ message: "Successfully done" });
-});
+////  currently commentted
 
 function vpoc_valueArea(chartData) {
   return new Promise((resolve, reject) => {
@@ -897,8 +901,8 @@ async function get_Instrument_ticks() {
             tokens.on("ticks", onTicks);
             tokens.on("connect", subscribe);
 
-            tokens.on("error", () => {
-              fs.appendFileSync("router/logs.txt", JSON.stringify({err :e.message, time : new Date()}));
+            tokens.on("error", (e) => {
+              add_error_msg_to_logger("instrument socket", e.message);
               // ...
               token_err = true;
               token_reviews++;
@@ -948,9 +952,25 @@ async function get_Instrument_ticks() {
           }
         })
         .catch(function (err) {
-        fs.appendFileSync("router/logs.txt", JSON.stringify({time : new Date()}));
+          add_error_msg_to_logger("Kite ticker KC", err.message);
         });
     });
+}
+
+function add_error_msg_to_logger(message, err) {
+  fs.appendFileSync(
+    "router/logs.txt",
+    JSON.stringify({
+      err,
+      message,
+      time: new Date(),
+    })
+  );
+  db.get().collection("ERROR-MSG").insertOne({
+    err,
+    message,
+    time: new Date(),
+  });
 }
 
 module.exports = Router;

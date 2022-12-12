@@ -71,7 +71,7 @@ class MainPage {
         );
       })
       .catch(function (err) {
-        // fs.appendFileSync("router/logs.txt", JSON.stringify({err :err.message, time : new Date()}));
+        fs.appendFileSync("router/logs.txt", JSON.stringify({err :err.message, time : new Date()}));
       });
   }
 }

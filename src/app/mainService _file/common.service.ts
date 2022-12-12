@@ -5,7 +5,6 @@ import { Injectable, OnDestroy, OnInit } from '@angular/core';
 })
 export class CommonService implements OnInit, OnDestroy {
   indexDB_Name: string = null;
-
   constructor() {}
 
   ngOnInit(): void {}
@@ -42,7 +41,6 @@ export class CommonService implements OnInit, OnDestroy {
   closeIndexed_DB() {
     const indexedDB = window.indexedDB;
     indexedDB.deleteDatabase(this.indexDB_Name);
-    sessionStorage.removeItem('vpocObj');
   }
   vpoc_valueArea(chartData: any) {
     var Array_POC = {};
@@ -108,7 +106,7 @@ export class CommonService implements OnInit, OnDestroy {
         valueAreaVolume: valueAreaVolume,
       };
     });
-    let lastEle: any = chartData.slice(-1)[0];
+    let lastEle: any = chartData.pop();
     chartData = null;
     return [{ obj: Array_POC }, lastEle];
   }

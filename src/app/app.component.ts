@@ -68,7 +68,6 @@ export class AppComponent implements OnInit, OnDestroy {
     // });
   }
 
-  // checking ipAddress once every refresh
   async checkCookie() {
     // finding path
     var path = window.location.href.substring(

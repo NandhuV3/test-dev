@@ -25,15 +25,14 @@
       </form>
     </div>
   </div>
-  <div class="row mt-5">
+  <div class="row mt-5 mb-5" id="monthly-labels">
     <div class="col-sm-12 mt-5">
-      <p class="alert alert-danger text-dark" *ngIf="showErr">{{showErrMsg}}</p>
-      <h2 class="text-center lead" *ngIf="emptyContent">{{emptyContentMsg}}</h2>
-      <table class="table text-center mt-3 " *ngIf="!emptyContent">
+      <div class="display-4 text-center">Monthly Labels</div>
+      <table class="table text-center mt-3 ">
         <tr>
           <th class="text-warning" *ngFor="let head of tableHeaders">{{head}}</th>
         </tr>
-        <tr *ngFor="let val of lablesList">
+        <tr *ngFor="let val of monthly_labels">
           <td>{{val.label}}</td>
           <td>{{val.price}}</td>
           <td>{{val.color}}</td>
@@ -41,25 +40,123 @@
           <td>
             <label class="switch">
               <input type="checkbox">
-              <span class={{val.AlertStatus}}
-                (click)="changeStatus([val.label,val.price,val.color,val.date,val.AlertStatus,val.SMS_status])"></span>
+              <span class={{val.AlertStatus}} (click)="changeStatus(val)"></span>
             </label>
           </td>
           <td>
             <label class="switch">
               <input disabled type="checkbox">
-              <span class={{val.SMS_status}}
-              ></span>
+              <span class={{val.SMS_status}}></span>
             </label>
           </td>
           <!-- (click)="changeStatus([val.label,val.price,val.color,val.date,val.SMS_status,val.SMS_status])" -->
           <td>
-            <i class="bi bi-pencil-square ml-5" (click)="editLabel([val.label,val.price,val.color,val.date])"></i>
-            <i class="bi bi-trash ml-5" (click)="deleteLabel(val.label)"></i>
+            <i class="bi bi-pencil-square ml-5" (click)="editLabel(val)"></i>
+            <!-- <i class="bi bi-trash ml-5" (click)="deleteLabel(val)"></i> -->
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="row mt-5 mb-5" id="prev-week-labels">
+    <div class="col-sm-12 mt-5">
+      <div class="display-4 text-center">Previous Week</div>
+
+      <table class="table text-center mt-3 ">
+        <tr>
+          <th class="text-warning" *ngFor="let head of tableHeaders">{{head}}</th>
+        </tr>
+        <tr *ngFor="let val of prev_week_labels">
+          <td>{{val.label}}</td>
+          <td>{{val.price}}</td>
+          <td>{{val.color}}</td>
+          <td>{{val.date}}</td>
+          <td>
+            <label class="switch">
+              <input type="checkbox">
+              <span class={{val.AlertStatus}} (click)="changeStatus(val)"></span>
+            </label>
+          </td>
+          <td>
+            <label class="switch">
+              <input disabled type="checkbox">
+              <span class={{val.SMS_status}}></span>
+            </label>
+          </td>
+          <td>
+            <i class="bi bi-pencil-square ml-5" (click)="editLabel(val)"></i>
+            <!-- <i class="bi bi-trash ml-5" (click)="deleteLabel(val)"></i> -->
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="row mt-5 mb-5" id="current-labels">
+    <div class="col-sm-12 mt-5">
+      <div class="display-4 text-center">Current Week</div>
+
+      <table class="table text-center mt-3 ">
+        <tr>
+          <th class="text-warning" *ngFor="let head of tableHeaders">{{head}}</th>
+        </tr>
+        <tr *ngFor="let val of current_week_labels">
+          <td>{{val.label}}</td>
+          <td>{{val.price}}</td>
+          <td>{{val.color}}</td>
+          <td>{{val.date}}</td>
+          <td>
+            <label class="switch">
+              <input type="checkbox">
+              <span class={{val.AlertStatus}} (click)="changeStatus(val)"></span>
+            </label>
+          </td>
+          <td>
+            <label class="switch">
+              <input disabled type="checkbox">
+              <span class={{val.SMS_status}}></span>
+            </label>
+          </td>
+          <td>
+            <i class="bi bi-pencil-square ml-5" (click)="editLabel(val)"></i>
+            <!-- <i class="bi bi-trash ml-5" (click)="deleteLabel(val)"></i> -->
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="row mt-5 mb-5" id="old-labels">
+    <div class="col-sm-12 mt-5">
+      <div class="display-4 text-center">Daily Labels</div>
+      <p class="alert alert-danger text-dark" *ngIf="showErr">{{showErrMsg}}</p>
+      <h2 class="text-center lead" *ngIf="emptyContent">{{emptyContentMsg}}</h2>
+      <table class="table text-center mt-3 " *ngIf="!emptyContent">
+        <tr>
+          <th class="text-warning" *ngFor="let head of tableHeaders">{{head}}</th>
+        </tr>
+        <tr *ngFor="let val of daily_labels">
+          <td>{{val.label}}</td>
+          <td>{{val.price}}</td>
+          <td>{{val.color}}</td>
+          <td>{{val.date}}</td>
+          <td>
+            <label class="switch">
+              <input type="checkbox">
+              <span class={{val.AlertStatus}} (click)="changeStatus(val)"></span>
+            </label>
+          </td>
+          <td>
+            <label class="switch">
+              <input disabled type="checkbox">
+              <span class={{val.SMS_status}}></span>
+            </label>
+          </td>
+          <td>
+            <i class="bi bi-pencil-square ml-5" (click)="editLabel(val)"></i>
+            <i class="bi bi-trash ml-5" (click)="deleteLabel(val)"></i>
           </td>
         </tr>
       </table>
     </div>
   </div>
 </div>
-<!-- <i class="fa-sharp fa-solid fa-file-pen"></i> <i class="fa-solid fa-trash"></i> -->

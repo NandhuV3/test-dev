@@ -2,7 +2,7 @@
   margin-top: 15vh;
   overflow-y: auto;
 }
-#candlestick {
+#candlestick{
   display: flex;
   width: 100%;
   height: 100%;
@@ -10,15 +10,8 @@
   min-height: 810px;
 }
 
-g.tick line {
-  stroke: #eee !important;
-  stroke-opacity: 0.5;
-  shape-rendering: crispEdges;
-}
-
-g.tick path {
-  stroke-width: 0;
-}
+g.tick line {stroke: #eee !important;stroke-opacity: 0.5;shape-rendering: crispEdges;}
+g.tick path {stroke-width: 0;}
 
 div.tooltip {
   position: absolute;
@@ -30,45 +23,38 @@ div.tooltip {
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
-  opacity: 0;
+  opacity:0;
 }
-
-.spinner {
+.spinner{
   margin-top: 20vh;
 }
-
-.spinner-border {
+.spinner-border{
   color: #fff;
   margin-top: 100px;
   margin-left: 50%;
 }
-
-.spinner p {
+.spinner p{
   margin-top: 20px;
   display: inline-block;
   margin-left: 45%;
 }
-
-.spinner-grow {
+.spinner-grow{
   margin: 0 3px;
   height: 0.3rem;
   width: 0.3rem;
   color: blue;
 }
-
-.load {
+.load{
   padding: 0%;
   margin: 0%;
 }
 
-#liveIB,
-#weeklyIB {
+#liveIB,#weeklyIB{
   width: 1px;
   height: 1px;
 }
-
 .ohlc-group{
-  display: flex;
+  display: none;
 }
 .ohlc-group div{
   display: flex;
@@ -80,13 +66,22 @@ div.tooltip {
 }
 #candle-ohlc{
   color : white;
+  padding: 10px;
   left: 2vw;
 }
-#timeOption {
-  list-style: none;
+
+
+
+// initial state of the page
+#display_chart{
+  display: none;
 }
 
 
+//  end of initial state
+
+
+// blink while price reached
 
 .blink_me {
   animation: blinker 1s linear infinite;

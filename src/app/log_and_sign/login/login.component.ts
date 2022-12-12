@@ -6,9 +6,7 @@ import { NGXLogger } from 'ngx-logger';
 import { environment } from 'src/environments/environment';
 import { AppComponent } from '../../app.component';
 import * as CryptoJS from 'crypto-js';
-declare const $ : any;
-const api_key = environment.api_key
-
+declare const $: any;
 const BACKEND_URL = environment.apiUrl + '/user/';
 
 @Component({
@@ -24,8 +22,7 @@ export class LoginComponent implements OnInit {
   isLoggedin: boolean = false;
   emptyEmail: boolean = false;
   showDOM: boolean = false;
-  kiteLoginUrl: string =
-    `https://kite.zerodha.com/connect/login?v=3&api_key=${api_key}`;
+  kiteLoginUrl: string = null;
   contactForm = new FormGroup({
     email: new FormControl(null, [Validators.required, Validators.email]),
     password: new FormControl(null, [Validators.required]),
@@ -54,13 +51,23 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  ngOnInit() {}
-  showEyeIcon : boolean = false;
-  show_pwd(){
-    if(!this.showEyeIcon){
+  ngOnInit() {
+    this.get_api_key();
+  }
+
+  get_api_key() {
+    this.http.post(BACKEND_URL + 'login_key', {}).subscribe((data: any) => {
+      if (data.hasOwnProperty('key')) {
+        this.kiteLoginUrl = `https://kite.zerodha.com/connect/login?v=3&api_key=${data.key}`;
+      }
+    });
+  }
+  showEyeIcon: boolean = false;
+  show_pwd() {
+    if (!this.showEyeIcon) {
       this.showEyeIcon = true;
       $('#secret_pwd').attr('type', 'text');
-    }else{
+    } else {
       this.showEyeIcon = false;
       $('#secret_pwd').attr('type', 'password');
     }

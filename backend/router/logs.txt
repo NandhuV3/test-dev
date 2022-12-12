@@ -1,1 +1,1 @@
-{"time":"2022-12-05T13:22:46.862Z"}
+{"err":"WebSocket was closed before the connection was established","message":"socket io","time":"2022-12-12T04:52:03.416Z"}{"err":"WebSocket was closed before the connection was established","message":"socket io","time":"2022-12-12T05:15:06.215Z"}{"err":"WebSocket was closed before the connection was established","message":"socket io","time":"2022-12-12T05:15:06.527Z"}

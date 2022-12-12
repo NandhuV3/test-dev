@@ -36,6 +36,7 @@ import { ReferenceComponent } from './charts/reference/reference.component';
 import { AppRoutingModule } from './appRouting.module';
 import { DRangeComponent } from './charts/d-range/d-range.component';
 import { OptionOfLiveComponent } from './charts/option-of-live/option-of-live.component';
+import { TestingChartComponent } from './charts/testing-chart/testing-chart.component';
 
 
 @NgModule({
@@ -64,6 +65,7 @@ import { OptionOfLiveComponent } from './charts/option-of-live/option-of-live.co
     ReferenceComponent,
     DRangeComponent,
     OptionOfLiveComponent,
+    TestingChartComponent
   ],
   imports: [
     BrowserModule,

@@ -17,11 +17,11 @@
     </div>
   </div>
 </div>
-
 <div *ngIf="isLoading" class="spinner">
   <div class="spinner-border" role="status"></div>
-  <div class="loading">
+  <div class="loading" *ngIf="isLoad">
     <p class="h3 text-white">Please wait</p>
+    <div class="spinner-border load" role="status" *ngIf="dateChangeLoading"></div>
     <div class="spinner-grow spinner-grow-sm" role="status">
     </div>
     <div class="spinner-grow spinner-grow-sm" role="status">
@@ -32,39 +32,22 @@
 </div>
 
 <div id="content">
-  <div class="container-fluid" *ngIf="!isLoading && !chartErr">
-    <div class="row">
-      <div class="col-sm-12">
-    <p *ngIf="timeErr" class="alert alert-danger">{{timeErrMsg}}</p>
-      </div>
-    </div>
+  <div class="container-fluid" id="display_chart">
     <div class="row text-white">
-      <div class="col-sm-2 col md-2 col-lg-2">
-        interval : <select (ngModelChange)="selectChange($event)" [ngModel]="timesDropdown">
+      <div class="col-sm-4 col md-4 col-lg-4">
+        interval : <select class="mr-5" (ngModelChange)="selectChange($event)" [ngModel]="timesDropdown">
           <option *ngFor="let option of timesOptions" [value]="option.id">{{option.name}}</option>
         </select>
-      </div>
-      <div class="col-sm-2 col md-2 col-lg-2">
+
         Scale : <select (ngModelChange)="changeScale($event)" [ngModel]="defaultScale">
           <option *ngFor="let option of scaleOptions" [value]="option.id">{{option.name}}</option>
         </select>
-      </div>
-      <div class="col-sm-2 col md-2 col-lg-2">
-        <p id="ibhTimer"></p>
-        <p id="iblTimer"></p>
-      </div>
-      <div class="col-sm-2 col md-2 col-lg-2">
-        <p id="wibhTimer"></p>
-        <p id="wiblTimer"></p>
-      </div>
-      <div class="col-sm-2 col md-2 col-lg-2">
-        calender : <input type="date" #calender (change)="onDateChange(calender.value)">
-      </div>
-      <div class="col-sm-2 col md-2 col-lg-2">
+
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        <button type="button" class="btn btn-light ml-5 btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
           Show IB
         </button>
+
         <!-- Modal -->
         <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="staticBackdropLabel"
           aria-hidden="true">
@@ -99,11 +82,21 @@
           </div>
         </div>
       </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="ibhTimer"></p>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="iblTimer"></p>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="wibhTimer"></p>
+      </div>
+      <div class="col-sm-2 col md-2 col-lg-2">
+        <p id="wiblTimer"></p>
+      </div>
     </div>
   </div>
-  <div *ngIf="!isLoading && !chartErr" class="ohlc-group text-white ml-5">
-    <div>Date : <p class="text-info" id="cur-Date"></p>
-    </div>
+  <div class="ohlc-group text-white ml-5 mt-3">
     <div>O <p id="ohlc_O"></p>
     </div>
     <div>H <p id="ohlc_H"></p>
@@ -116,12 +109,9 @@
     </div>
     <div>VAL <p id="VA_L"></p>
     </div>
-    <div class="d-flex"> TIMER  <input type="time" (click)="setTime()" class="form-control ml-3 input-sm" id="setTimeInput">
-      <button *ngIf="showTime_set_btn" (click)="setTime_chart()" class="btn btn-primary btn-sm ml-3">ok</button>
-    </div>
   </div>
   <div id="candle-ohlc"></div>
-  <div style="display: none;" id="chart-spinner">
+  <div id="chart-spinner">
     <div class="spinner-border" role="status"></div>
   </div>
   <div id="candlestick">
